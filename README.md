@@ -103,8 +103,15 @@ then be built by including it into a document (example below).
 
 
 ## Sublime Text Integration ##
+ 
+A nicer integration in sublime text can be achieved by adding snippets.
+These allow auto completion using less verbose shortcuts. The following two are included:
+ 
+ + Type `%todo` <kbd>TAB</kbd> completes to `%!TODO: `
+ + Type `%sum` <kbd>TAB</kbd> completes to `%!SUMMARY: `
 
-Snippet to add a todo:
+
+#### Snippet to add a todo:
 
 ```html
 <snippet>
@@ -115,7 +122,8 @@ Snippet to add a todo:
 	<scope>text.tex.latex</scope>
 </snippet>
 ```
-Snippet to add a summary item:
+
+#### Snippet to add a summary item:
 
 ```html
 <snippet>
