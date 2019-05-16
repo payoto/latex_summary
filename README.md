@@ -100,3 +100,31 @@ then be built by including it into a document (example below).
 
  + Parses text one by line: section names must be finished before a line 
  ending is encountered. 
+
+
+## Sublime Text Integration ##
+
+Snippet to add a todo:
+
+```html
+<snippet>
+	<content><![CDATA[
+%!TODO: ${1:this}.
+]]></content>
+	<tabTrigger>%todo</tabTrigger>
+	<scope>text.tex.latex</scope>
+</snippet>
+```
+Snippet to add a summary item:
+
+```html
+<snippet>
+	<content><![CDATA[
+%!SUMMARY: ${1:this}.
+]]></content>
+		<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>%sum</tabTrigger>
+		<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>text.tex.latex</scope>
+</snippet>
+```
