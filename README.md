@@ -66,33 +66,6 @@ inside the summary document. These comments are:
 
 For these comments everything after the `:` is captured
 until a sentence terminating mark is encountered (`.!?`) or an end of line.
-Example below:
-
-```latex
-\section{Sample section}
-
-%!TODO: Actually put text instead of lorem ipsum.
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-%!SUMMARY: Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-
-\subsection{Sample subsection}
-```
-
-Will become:
-```latex
-\section{Sample section}
-    \begin{itemize}[noitemsep]
-        \item Actually put text instead of lorem ipsum.
-        \item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-    \end{itemize}
-\subsection{Sample subsection}
-```
 
 
 ### Building the summary document ###
