@@ -30,13 +30,13 @@ line_record_triggers = [
 capture_directive = r"%! *"
 capture_sentence = r" *:* *([^\.!\?]*[\.!\?]*)"
 phrase_record_triggers = [
-    r"%! *TO+DO+ *: *([^\.!\?]*[\.!\?]*)",
-    r"%! *SU[M]+A[R]+Y *:* *([^\.!\?]*[\.!\?]*)",
     capture_directive + r"TO+DO+ *:*" + capture_sentence,
     capture_directive + r"SU[M]+A[R]+Y" + capture_sentence,
+    capture_directive + r"MULT[ILINE]*" + capture_sentence,
 ]
 
 section_spacing = r"\vspace{-36pt}\hspace{11pt}"
+
 
 def build_regex_list(patterns):
     return [re.compile(pattern) for pattern in patterns]
@@ -53,8 +53,10 @@ def build_file_parse_re(commands):
 
 def build_summary_parse_re(commands, patterns):
 
-    re_type = [dict({"phrase": True}) for _ in patterns]
+    re_type = [dict({"item": True}) for _ in patterns]
     re_type[0]["todo"] = True
+    re_type[2]["multiline"] = True
+    del re_type[2]["item"]
     re_type.extend([dict({"line": True}) for _ in commands])
     re_type[len(patterns)] = {"title": True}
     re_type[len(patterns) + 1] = {"title": False}
@@ -117,7 +119,7 @@ def parse_file(
     ref_format = "\\ref{{autosec:{0}}}"
     current_label = label_format.format(n_section)
     current_ref = ref_format.format(n_section)
-
+    prev_record = {}
     if n_stacks == 0:
         records['todos'].append(r"\section{List of To-dos}")
         records['todos'].append(start_item)
@@ -131,7 +133,8 @@ def parse_file(
             if record_is("line", record_type):
                 close_itemlist(records['summary'],
                                start_item, end_item, item_str)
-            if "todo" in record_type:
+            if record_is("todo", record_type) \
+                    or previous_record_is("todo", prev_record, record_type):
                 record = todo_format.format(record)
             if record_is("item", record_type):
                 record = item_str + record
@@ -146,9 +149,14 @@ def parse_file(
                 records['summary'].append(record)
                 records['summary'].append(line_info)
 
-            if "todo" in record_type:
-                records['todos'].append(record +
-                                        " (section~{0})".format(current_ref))
+            if record_is("todo", record_type) or \
+                    previous_record_is("todo", prev_record, record_type):
+                if record_is("todo", record_type):
+                    records['todos'].append(
+                        record + " (section~{0})".format(current_ref))
+                else:
+                    records['todos'].append(record)
+
                 records['todos'].append(line_info)
 
             if record_is("line", record_type):
@@ -157,6 +165,9 @@ def parse_file(
                 current_ref = ref_format.format(n_section)
                 records['summary'].append(current_label)
                 records['summary'].append(start_item)
+
+            if record_isnot("multiline", record_type):
+                prev_record = record_type
 
             next_file = detect_file(line, file_in)
             if next_file:
