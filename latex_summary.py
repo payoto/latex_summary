@@ -7,7 +7,7 @@ a summary.
 import os
 import re
 import sys
-# import pdb
+
 
 file_parse_triggers = [
     r"input",
@@ -79,12 +79,21 @@ def close_itemlist(records, start_item, end_item, item_str):
         records.append(end_item)
 
 
-def parse_file(file_in, records=[], n_stacks=0):
-    records.append("% Start file : " + file_in)
+def parse_file(
+    file_in,
+    records={'todos': [], 'summary': []},
+    n_stacks=0,
+):
+    records['summary'].append("% Start file : " + file_in)
     start_item = "    \\begin{itemize}[noitemsep]"
     end_item = "    \\end{itemize}"
     item_str = "        \\item "
     todo_format = "{{\color{{red}}{0}}}"
+
+    if n_stacks == 0:
+        records['todos'].append(r"\section{List of To-dos}")
+        records['todos'].append(start_item)
+
     with open(file_in, 'r') as f:
         for line_num, line in enumerate(f):
 
@@ -92,7 +101,8 @@ def parse_file(file_in, records=[], n_stacks=0):
             record_type, record = detect_record(line)
 
             if "line" in record_type:
-                close_itemlist(records, start_item, end_item, item_str)
+                close_itemlist(records['summary'],
+                               start_item, end_item, item_str)
             if "todo" in record_type:
                 record = todo_format.format(record)
             if "phrase" in record_type:
@@ -100,18 +110,22 @@ def parse_file(file_in, records=[], n_stacks=0):
 
             if record_type:
                 record += line_info
-                records.append(record)
+                records['summary'].append(record)
+            if "todo" in record_type:
+                records['todos'].append(record)
             if "line" in record_type:
-                records.append(start_item)
+                records['summary'].append(start_item)
+
             next_file = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
                 parse_file(next_file, records, n_stacks + 1)
 
     if n_stacks == 0:
-        close_itemlist(records, start_item, end_item, item_str)
+        close_itemlist(records['summary'], start_item, end_item, item_str)
+        close_itemlist(records['todos'], start_item, end_item, item_str)
 
-    records.append("% End file : " + file_in)
+    records['summary'].append("% End file : " + file_in)
     return records
 
 
@@ -144,7 +158,6 @@ def detect_file(line, current_file):
 def detect_record(line):
     record_type = {}
     record = line
-
     for pat_re, pat_type in zip(summary_parse_re, summary_parse_re_types):
         m = pat_re.search(line)
         if m:
@@ -164,7 +177,9 @@ def write_records(records, file_name, name_change='_auto_summary'):
     file, ext = os.path.splitext(file_name)
     new_file = file + "_auto_summary" + ext
     with open(new_file, 'w') as f:
-        f.writelines("%s\n" % l for l in records)
+        for rec in records:
+            f.writelines("%s\n" % l for l in records[rec])
+            f.write("\n")
 
 
 if __name__ == "__main__":
