@@ -87,12 +87,17 @@ def parse_file(
     file_in,
     records={'title': [], 'todos': [], 'summary': []},
     n_stacks=0,
+    n_section=0,
 ):
     records['summary'].append("% Start file : " + file_in)
     start_item = "    \\begin{itemize}[noitemsep]"
     end_item = "    \\end{itemize}"
     item_str = "        \\item "
     todo_format = "{{\color{{red}}{0}}}"
+    label_format = "\label{{autosec:{0}}}"
+    ref_format = "\\ref{{autosec:{0}}}"
+    current_label = label_format.format(n_section)
+    current_ref = ref_format.format(n_section)
 
     if n_stacks == 0:
         records['todos'].append(r"\section{List of To-dos}")
@@ -116,21 +121,25 @@ def parse_file(
                     record = re.sub(r"\\title\s*\{",
                                     r"\\title{Summary of : ", record)
                 records["title"].append(record)
-                record_type = {}
-
+                record_type = {}  # Stop it being recorded in the main text
 
             if record_type:
-                record += line_info
-                records['summary'].append(record)
+                records['summary'].append(record + line_info)
             if "todo" in record_type:
-                records['todos'].append(record)
+                records['todos'].append(record +
+                                        " (section~{0})".format(current_ref) +
+                                        line_info)
             if "line" in record_type:
+                n_section += 1
+                current_label = label_format.format(n_section)
+                current_ref = ref_format.format(n_section)
+                records['summary'].append(current_label)
                 records['summary'].append(start_item)
 
             next_file = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
-                parse_file(next_file, records, n_stacks + 1)
+                parse_file(next_file, records, n_stacks + 1, n_section)
 
     if n_stacks == 0:
         close_itemlist(records['summary'], start_item, end_item, item_str)
