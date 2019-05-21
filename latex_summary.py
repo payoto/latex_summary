@@ -46,8 +46,9 @@ def build_file_parse_re(commands):
 
 def build_summary_parse_re(commands, patterns):
 
-    re_type = ["phrase" for _ in patterns]
-    re_type.extend(["line" for _ in commands])
+    re_type = [dict({"phrase": True}) for _ in patterns]
+    re_type[0]["todo"] = True
+    re_type.extend([dict({"line": True}) for _ in commands])
     patterns.extend(
         [r"^[^%]*(\\" + c + ".*)" for c in commands]
     )
@@ -74,7 +75,7 @@ def close_itemlist(records, start_item, end_item, item_str):
     if records[prev_rec] == start_item:
         records.pop(prev_rec)
         records.append("")  # needed to make sure the pdf breaks correctly
-    elif records[prev_rec][0:len(item_str)] == item_str:
+    elif records[prev_rec].find(item_str) >= 0:
         records.append(end_item)
 
 
@@ -83,20 +84,25 @@ def parse_file(file_in, records=[], n_stacks=0):
     start_item = "    \\begin{itemize}[noitemsep]"
     end_item = "    \\end{itemize}"
     item_str = "        \\item "
+    todo_format = "{{\color{{red}}{0}}}"
     with open(file_in, 'r') as f:
         for line_num, line in enumerate(f):
 
             line_info = "  % " + file_in + ":" + str(line_num + 1)
             record_type, record = detect_record(line)
-            record += line_info
 
-            if record_type == "line":
+            if "line" in record_type:
                 close_itemlist(records, start_item, end_item, item_str)
-                records.append(record)
-                records.append(start_item)
-            if record_type == "phrase":
-                records.append(item_str + record)
+            if "todo" in record_type:
+                record = todo_format.format(record)
+            if "phrase" in record_type:
+                record = item_str + record
 
+            if record_type:
+                record += line_info
+                records.append(record)
+            if "line" in record_type:
+                records.append(start_item)
             next_file = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
@@ -136,7 +142,7 @@ def detect_file(line, current_file):
 
 
 def detect_record(line):
-    record_type = None
+    record_type = {}
     record = line
 
     for pat_re, pat_type in zip(summary_parse_re, summary_parse_re_types):
@@ -146,8 +152,7 @@ def detect_record(line):
     if m:
         record = m.group(1)
         record_type = pat_type
-    # if record_type == "phrase":
-    #     pdb.set_trace()
+
     return record_type, record
 
 
