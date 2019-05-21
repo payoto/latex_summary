@@ -135,3 +135,7 @@ These allow auto completion using less verbose shortcuts. The following two are 
 	<scope>text.tex.latex</scope>
 </snippet>
 ```
+
+### Version ###
+
+1.0.0
