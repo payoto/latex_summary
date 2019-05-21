@@ -27,9 +27,13 @@ line_record_triggers = [
     r"pagenumbering",
 ]
 
+capture_directive = r"%! *"
+capture_sentence = r" *:* *([^\.!\?]*[\.!\?]*)"
 phrase_record_triggers = [
     r"%! *TO+DO+ *: *([^\.!\?]*[\.!\?]*)",
     r"%! *SU[M]+A[R]+Y *:* *([^\.!\?]*[\.!\?]*)",
+    capture_directive + r"TO+DO+ *:*" + capture_sentence,
+    capture_directive + r"SU[M]+A[R]+Y" + capture_sentence,
 ]
 
 section_spacing = r"\vspace{-36pt}\hspace{11pt}"
@@ -81,8 +85,21 @@ def close_itemlist(records, start_item, end_item, item_str):
         records.pop(prev_rec)
         # needed to make sure the pdf breaks correctly
         records.append(section_spacing)
-    elif records[prev_rec].find(item_str) >= 0:
+    elif "line" not in detect_record(records[prev_rec])[0]:
         records.append(end_item)
+
+
+def record_is(rec_str, record_type):
+    return rec_str in record_type and record_type[rec_str]
+
+
+def record_isnot(rec_str, record_type):
+    return rec_str not in record_type or not record_type[rec_str]
+
+
+def previous_record_is(rec_str, prev_record, record_type):
+    return record_is(rec_str, prev_record) and\
+        record_is("multiline", record_type)
 
 
 def parse_file(
@@ -111,12 +128,12 @@ def parse_file(
             line_info = "        % " + file_in + ":" + str(line_num + 1)
             record_type, record = detect_record(line)
 
-            if "line" in record_type:
+            if record_is("line", record_type):
                 close_itemlist(records['summary'],
                                start_item, end_item, item_str)
             if "todo" in record_type:
                 record = todo_format.format(record)
-            if "phrase" in record_type:
+            if record_is("item", record_type):
                 record = item_str + record
             if "title" in record_type:
                 if record_type["title"]:
@@ -125,7 +142,7 @@ def parse_file(
                 records["title"].append(record)
                 record_type = {}  # Stop it being recorded in the main text
 
-            if record_type:
+            if record_type and record_isnot("newline", record_type):
                 records['summary'].append(record)
                 records['summary'].append(line_info)
 
@@ -134,7 +151,7 @@ def parse_file(
                                         " (section~{0})".format(current_ref))
                 records['todos'].append(line_info)
 
-            if "line" in record_type:
+            if record_is("line", record_type):
                 n_section += 1
                 current_label = label_format.format(n_section)
                 current_ref = ref_format.format(n_section)
