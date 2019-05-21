@@ -32,6 +32,7 @@ phrase_record_triggers = [
     r"%! *SU[M]+A[R]+Y *:* *([^\.!\?]*[\.!\?]*)",
 ]
 
+section_spacing = r"\vspace{-36pt}\hspace{11pt}"
 
 def build_regex_list(patterns):
     return [re.compile(pattern) for pattern in patterns]
@@ -79,7 +80,7 @@ def close_itemlist(records, start_item, end_item, item_str):
     if records[prev_rec] == start_item:
         records.pop(prev_rec)
         # needed to make sure the pdf breaks correctly
-        records.append("\\vspace{-11pt}")
+        records.append(section_spacing)
     elif records[prev_rec].find(item_str) >= 0:
         records.append(end_item)
 
