@@ -78,7 +78,8 @@ def close_itemlist(records, start_item, end_item, item_str):
 
     if records[prev_rec] == start_item:
         records.pop(prev_rec)
-        records.append("")  # needed to make sure the pdf breaks correctly
+        # needed to make sure the pdf breaks correctly
+        records.append("\\vspace{-11pt}")
     elif records[prev_rec].find(item_str) >= 0:
         records.append(end_item)
 
