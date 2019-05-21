@@ -139,14 +139,15 @@ def parse_file(
             next_file = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
-                parse_file(next_file, records, n_stacks + 1, n_section)
+                _, n_section = parse_file(next_file, records, n_stacks + 1,
+                                          n_section)
 
     if n_stacks == 0:
         close_itemlist(records['summary'], start_item, end_item, item_str)
         close_itemlist(records['todos'], start_item, end_item, item_str)
 
     records['summary'].append("% End file : " + file_in)
-    return records
+    return records, n_section
 
 
 def detect_file(line, current_file):
@@ -204,5 +205,5 @@ def write_records(records, file_name, name_change='_auto_summary'):
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
-    records = parse_file(file_name)
+    records, _ = parse_file(file_name)
     write_records(records, file_name)
