@@ -72,7 +72,7 @@ def close_itemlist(records, start_item, end_item, item_str):
     while flag:
         if -prev_rec > len(records):
             return
-        if records[prev_rec][0] == "%":
+        if re.compile("\\s*%").match(records[prev_rec]):
             prev_rec += -1
         else:
             flag = False
@@ -108,7 +108,7 @@ def parse_file(
     with open(file_in, 'r') as f:
         for line_num, line in enumerate(f):
 
-            line_info = "  % " + file_in + ":" + str(line_num + 1)
+            line_info = "        % " + file_in + ":" + str(line_num + 1)
             record_type, record = detect_record(line)
 
             if "line" in record_type:
@@ -126,11 +126,14 @@ def parse_file(
                 record_type = {}  # Stop it being recorded in the main text
 
             if record_type:
-                records['summary'].append(record + line_info)
+                records['summary'].append(record)
+                records['summary'].append(line_info)
+
             if "todo" in record_type:
                 records['todos'].append(record +
-                                        " (section~{0})".format(current_ref) +
-                                        line_info)
+                                        " (section~{0})".format(current_ref))
+                records['todos'].append(line_info)
+
             if "line" in record_type:
                 n_section += 1
                 current_label = label_format.format(n_section)
