@@ -17,6 +17,8 @@ file_parse_triggers = [
 ]
 
 line_record_triggers = [
+    r"title",
+    r"maketitle",
     r"chapter",
     r"paragraph",
     r"[sub]*section",
@@ -49,6 +51,7 @@ def build_summary_parse_re(commands, patterns):
     re_type = [dict({"phrase": True}) for _ in patterns]
     re_type[0]["todo"] = True
     re_type.extend([dict({"line": True}) for _ in commands])
+    re_type[len(patterns)]["title"] = True
     patterns.extend(
         [r"^[^%]*(\\" + c + ".*)" for c in commands]
     )
@@ -107,6 +110,9 @@ def parse_file(
                 record = todo_format.format(record)
             if "phrase" in record_type:
                 record = item_str + record
+            if "title" in record_type:
+                record = re.sub(r"\\title\s*\{",
+                                r"\\title{Summary of : ", record)
 
             if record_type:
                 record += line_info
