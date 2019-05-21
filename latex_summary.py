@@ -51,7 +51,8 @@ def build_summary_parse_re(commands, patterns):
     re_type = [dict({"phrase": True}) for _ in patterns]
     re_type[0]["todo"] = True
     re_type.extend([dict({"line": True}) for _ in commands])
-    re_type[len(patterns)]["title"] = True
+    re_type[len(patterns)] = {"title": True}
+    re_type[len(patterns) + 1] = {"title": False}
     patterns.extend(
         [r"^[^%]*(\\" + c + ".*)" for c in commands]
     )
@@ -84,7 +85,7 @@ def close_itemlist(records, start_item, end_item, item_str):
 
 def parse_file(
     file_in,
-    records={'todos': [], 'summary': []},
+    records={'title': [], 'todos': [], 'summary': []},
     n_stacks=0,
 ):
     records['summary'].append("% Start file : " + file_in)
@@ -111,8 +112,12 @@ def parse_file(
             if "phrase" in record_type:
                 record = item_str + record
             if "title" in record_type:
-                record = re.sub(r"\\title\s*\{",
-                                r"\\title{Summary of : ", record)
+                if record_type["title"]:
+                    record = re.sub(r"\\title\s*\{",
+                                    r"\\title{Summary of : ", record)
+                records["title"].append(record)
+                record_type = {}
+
 
             if record_type:
                 record += line_info
