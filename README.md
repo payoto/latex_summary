@@ -83,18 +83,17 @@ then be built by including it into a document (example below).
 
 \documentclass[]{memoir}
 \usepackage{enumitem}
+\usepackage{xcolor}
+
 \begin{document}
-
-\renewcommand{\contentsname}{Table of Contents}
-\tableofcontents*
-\addtocontents{toc}{\par\nobreak \mbox{}\hfill{\bf Page}\par\nobreak}
-
 
 \input{your/main/latex_file_auto_summary}
 
 \end{document}
 
 ```
+
+A working example is available in the `test/` folder.
 
 ## Limitations ##
 
