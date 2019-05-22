@@ -5,22 +5,9 @@
 			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
 			"name": "Anaconda Python Builder",
 			"selector": "source.python",
-			"shell_cmd": "\"python\" -u \"$file\" test/main.tex"
+			"shell_cmd": "\"python\" -u \"$file\""
 		}
 	],
-	"settings":{
-		"TEXroot": "test/main_summary.tex",
-		"builder_settings":
-		{
-			"windows":
-			{
-				"script_commands":
-				[
-					"python latex_summary.py test/main.tex"
-				]
-			}
-		},
-	},
 	"folders":
 	[
 		{
@@ -39,5 +26,19 @@
 			],
 			"path": "."
 		}
-	]
+	],
+	"settings":
+	{
+		"TEXroot": "test/main_summary.tex",
+		"builder_settings":
+		{
+			"windows":
+			{
+				"script_commands":
+				[
+					"python latex_summary.py test/main.tex"
+				]
+			}
+		}
+	}
 }

@@ -53,7 +53,9 @@ LaTeX output formatting module attributes.
 """
 section_spacing = r"\vspace{-36pt}\hspace{11pt}"
 start_item = "    \\begin{itemize}[noitemsep]"
+start_enum = "    \\begin{enumerate}[noitemsep]"
 end_item = "    \\end{itemize}"
+end_enum = "    \\end{enumerate}"
 item_str = "        \\item "
 color_format = "{{\color{{{0}}}{1}}}"
 label_format = "\label{{autosec:{0}}}"
@@ -82,17 +84,23 @@ def build_summary_parse_re(commands, patterns):
     re_type = [dict({"item": True}) for _ in patterns]
     re_type[0]["todo"] = True
     re_type[0]["color"] = "red"
+    re_type[0]["count"] = "todo"
+    re_type[1]["count"] = "summary"
     re_type[2]["multiline"] = True
     re_type[3]["muddle"] = True
     re_type[3]["color"] = "OliveGreen"
+    re_type[3]["count"] = "muddle"
     re_type[4]["color"] = "blue"
+    re_type[4]["count"] = "plan"
     del re_type[2]["item"]
 
     re_type.extend([dict({"line": True}) for _ in commands])
     re_type[len(patterns)] = {"title": True}  # \title{}
     re_type[len(patterns) + 1] = {"title": False}  # \maketitle
     re_type[len(patterns) + 2]["section"] = True  # \chapter{}
+    re_type[len(patterns) + 2]["count"] = "section"  # \chapter{}
     re_type[len(patterns) + 3]["section"] = True  # \[sub]*section{}
+    re_type[len(patterns) + 3]["count"] = "section"  # \[sub]*section{}
     re_type[len(patterns) + 4] = {"title": False}  # \frontmatter
 
     re_strings = [pattern_name_to_re_string(p) for p in patterns]
@@ -176,41 +184,55 @@ def close_itemlist(records, start_item, end_item, item_str):
             prev_rec -= 1
 
 
+parser_summary_str = r"\item \textbf{{{0}s}}: {1} were detected."
+
+
+def summarise_parser_activity(records, counters):
+
+    records.append(r"\section{Parser results}")
+    records.append(start_item)
+    for count in counters:
+        records.append(parser_summary_str.format(count, counters[count]))
+
+    records.append(end_item)
+
+
 def parse_file(file_in,
-               records={'title': [], 'todos': [], 'summary': []},
+               records={'title': [], 'parser': [], 'todos': [], 'summary': []},
                n_stacks=0,
-               n_section=0,
+               counters={"section": 0},
                ):
 
     records['summary'].append("% Start file : " + file_in)
     prev_record = {}
     if n_stacks == 0:
         records['todos'].append(r"\section{List of To-dos}")
-        records['todos'].append(start_item)
+        records['todos'].append(start_enum)
 
     with open(file_in, 'r') as f:
         for line_num, line in enumerate(f):
 
             line_info = "        % " + file_in + ":" + str(line_num + 1)
 
-            prev_record, n_section = process_record(records,
-                                                    line,
-                                                    line_info,
-                                                    prev_record,
-                                                    n_section)
+            prev_record, counters = process_record(records,
+                                                   line,
+                                                   line_info,
+                                                   prev_record,
+                                                   counters)
 
             next_file = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
-                _, n_section = parse_file(next_file, records, n_stacks + 1,
-                                          n_section)
+                _, counters = parse_file(next_file, records, n_stacks + 1,
+                                         counters)
 
     if n_stacks == 0:
         close_itemlist(records['summary'], start_item, end_item, item_str)
-        close_itemlist(records['todos'], start_item, end_item, item_str)
+        close_itemlist(records['todos'], start_enum, end_enum, item_str)
+        summarise_parser_activity(records['parser'], counters)
 
     records['summary'].append("% End file : " + file_in)
-    return records, n_section
+    return records, counters
 
 
 def detect_file(line, current_file):
@@ -282,7 +304,7 @@ def records_are_value(rec_str, prev_record, curr_record):
     return logical, val
 
 
-def process_record(records, line, line_info, prev_record, n_section,):
+def process_record(records, line, line_info, prev_record, nums,):
 
     record_type, record = detect_record(line)
 
@@ -311,20 +333,25 @@ def process_record(records, line, line_info, prev_record, n_section,):
     if records_are("todo", prev_record, record_type):
         if record_is("todo", record_type):
             records['todos'].append(
-                record + " (section~{0})".format(ref_format.format(n_section)))
+                record
+                + " (section~{0})".format(ref_format.format(nums["section"])))
         else:
             records['todos'].append(record)
 
         records['todos'].append(line_info)
 
     if record_is("line", record_type):
-        n_section += 1
-        records['summary'].append(label_format.format(n_section))
+        records['summary'].append(label_format.format(nums["section"]))
 
     if record_isnot("multiline", record_type):
         prev_record = record_type
+    if record_is("count", record_type):
+        try:
+            nums[record_type["count"]] += 1
+        except Exception as e:
+            nums[record_type["count"]] = 1
 
-    return prev_record, n_section
+    return prev_record, nums
 
 
 def write_records(records, file_name, name_change='_auto_summary'):
@@ -342,5 +369,5 @@ def write_records(records, file_name, name_change='_auto_summary'):
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
-    records, _ = parse_file(file_name)
+    records, counters = parse_file(file_name)
     write_records(records, file_name)
