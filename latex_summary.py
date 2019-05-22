@@ -121,8 +121,8 @@ def parse_file(file_in,
                n_stacks=0,
                n_section=0,
                ):
+
     records['summary'].append("% Start file : " + file_in)
-    current_ref = ref_format.format(n_section)
     prev_record = {}
     if n_stacks == 0:
         records['todos'].append(r"\section{List of To-dos}")
@@ -132,13 +132,12 @@ def parse_file(file_in,
         for line_num, line in enumerate(f):
 
             line_info = "        % " + file_in + ":" + str(line_num + 1)
-            record_type, record = detect_record(line)
 
             prev_record, n_section = process_record(records,
-                                                                 line,
-                                                                 line_info,
-                                                                 prev_record,
-                                                                 n_section)
+                                                    line,
+                                                    line_info,
+                                                    prev_record,
+                                                    n_section)
 
             next_file = detect_file(line, file_in)
             if next_file:
