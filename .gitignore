@@ -108,3 +108,6 @@ test/*.log
 test/*.aux
 test/*.synctex.gz
 test/*.toc
+
+# sublime stuff
+*.sublime-workspace

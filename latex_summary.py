@@ -35,6 +35,7 @@ phrase_record_triggers = [
     r"SU[M]+A[R]+Y",
     r"MULT[ILINE]*",
     r"MUD+[LED]*",
+    r"PLAN",
 ]
 re_comment = re.compile("\\s*%")
 
@@ -54,8 +55,7 @@ section_spacing = r"\vspace{-36pt}\hspace{11pt}"
 start_item = "    \\begin{itemize}[noitemsep]"
 end_item = "    \\end{itemize}"
 item_str = "        \\item "
-todo_format = "{{\color{{red}}{0}}}"
-muddle_format = "{{\color{{OliveGreen}}{0}}}"
+color_format = "{{\color{{{0}}}{1}}}"
 label_format = "\label{{autosec:{0}}}"
 ref_format = "\\ref{{autosec:{0}}}"
 
@@ -81,8 +81,11 @@ def build_summary_parse_re(commands, patterns):
     # Set all patterns type as "item" -> will trigger a new item
     re_type = [dict({"item": True}) for _ in patterns]
     re_type[0]["todo"] = True
+    re_type[0]["color"] = "red"
     re_type[2]["multiline"] = True
     re_type[3]["muddle"] = True
+    re_type[3]["color"] = "OliveGreen"
+    re_type[4]["color"] = "blue"
     del re_type[2]["item"]
 
     re_type.extend([dict({"line": True}) for _ in commands])
@@ -169,23 +172,8 @@ def close_itemlist(records, start_item, end_item, item_str):
                 records.append(section_spacing)
             flag = False
         else:
-            print("flag_text raised by " + records[prev_rec])
-            print(detect_record(records[prev_rec])[0])
             flag_text = True
             prev_rec -= 1
-
-
-def record_is(rec_str, record_type):
-    return rec_str in record_type and record_type[rec_str]
-
-
-def record_isnot(rec_str, record_type):
-    return rec_str not in record_type or not record_type[rec_str]
-
-
-def previous_record_is(rec_str, prev_record, record_type):
-    return record_is(rec_str, prev_record) and\
-        record_is("multiline", record_type)
 
 
 def parse_file(file_in,
@@ -265,6 +253,35 @@ def detect_record(line):
     return record_type, record
 
 
+def record_is(rec_str, record_type):
+    return rec_str in record_type and record_type[rec_str]
+
+
+def record_isnot(rec_str, record_type):
+    return rec_str not in record_type or not record_type[rec_str]
+
+
+def previous_record_is(rec_str, prev_record, record_type):
+    return record_is(rec_str, prev_record) and\
+        record_is("multiline", record_type)
+
+
+def records_are(rec_str, prev_record, curr_record):
+    return record_is(rec_str, curr_record) \
+        or previous_record_is(rec_str, prev_record, curr_record)
+
+
+def records_are_value(rec_str, prev_record, curr_record):
+    val = None
+    logical = records_are(rec_str, prev_record, curr_record)
+    if logical and record_is(rec_str, curr_record):
+        val = curr_record[rec_str]
+    elif logical:
+        val = prev_record[rec_str]
+
+    return logical, val
+
+
 def process_record(records, line, line_info, prev_record, n_section,):
 
     record_type, record = detect_record(line)
@@ -272,12 +289,11 @@ def process_record(records, line, line_info, prev_record, n_section,):
     if record_is("line", record_type):
         close_itemlist(records['summary'],
                        start_item, end_item, item_str)
-    if record_is("todo", record_type) \
-            or previous_record_is("todo", prev_record, record_type):
-        record = todo_format.format(record)
-    if record_is("muddle", record_type) \
-            or previous_record_is("muddle", prev_record, record_type):
-        record = muddle_format.format(record)
+
+    is_color, color = records_are_value("color", prev_record, record_type)
+    if is_color:
+        record = color_format.format(color, record)
+
     if record_is("item", record_type):
         open_itemlist(records['summary'], start_item, end_item, item_str)
         record = item_str + record
@@ -292,8 +308,7 @@ def process_record(records, line, line_info, prev_record, n_section,):
         records['summary'].append(record)
         records['summary'].append(line_info)
 
-    if record_is("todo", record_type) or \
-            previous_record_is("todo", prev_record, record_type):
+    if records_are("todo", prev_record, record_type):
         if record_is("todo", record_type):
             records['todos'].append(
                 record + " (section~{0})".format(ref_format.format(n_section)))

@@ -11,8 +11,10 @@
         % test\test_latex_summary.tex:25
         \item {\color{red}Actually put text instead of lorem ipsum.} (section~\ref{autosec:4})
         % test\test_latex_summary.tex:36
-        \item {\color{red}Add something to see here.} (section~\ref{autosec:13})
-        % test\test_latex_summary2.tex:6
+        \item {\color{red}This should be red text for an item ``to-do''.} (section~\ref{autosec:13})
+        % test\test_latex_summary2.tex:7
+{\color{red}This should match the previous sentence.}
+        % test\test_latex_summary2.tex:8
     \end{itemize}
 
 % Start file : test/main.tex
@@ -86,16 +88,28 @@ These can overlap if the sectionning is not done correctly.
         % test\test_latex_summary.tex:60
 % End file : test\test_latex_summary.tex
 % Start file : test\test_latex_summary2.tex
-\chapter{The second}
+\chapter{Test the multi-line functionality}
         % test\test_latex_summary2.tex:1
 \label{autosec:13}
-This should print raw text.
+This should print raw text not in an item.
         % test\test_latex_summary2.tex:3
     \begin{itemize}[noitemsep]
-        \item Nothing to see here.
+        \item Black summary test.
         % test\test_latex_summary2.tex:5
-        \item {\color{red}Add something to see here.}
+This should match the previous sentence.
         % test\test_latex_summary2.tex:6
+        \item {\color{red}This should be red text for an item ``to-do''.}
+        % test\test_latex_summary2.tex:7
+{\color{red}This should match the previous sentence.}
+        % test\test_latex_summary2.tex:8
+        \item {\color{OliveGreen}This should be ``OliveGreen'' text for a muddled paragraph.}
+        % test\test_latex_summary2.tex:9
+{\color{OliveGreen}This should match the previous sentence.}
+        % test\test_latex_summary2.tex:10
+        \item {\color{blue}This should appear in blue for a planned paragraph.}
+        % test\test_latex_summary2.tex:11
+{\color{blue}This should match the previous sentence.}
+        % test\test_latex_summary2.tex:12
 % End file : test\test_latex_summary2.tex
     \end{itemize}
 % End file : test/main.tex

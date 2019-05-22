@@ -1,0 +1,43 @@
+{
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"python\" -u \"$file\" test/main.tex"
+		}
+	],
+	"settings":{
+		"TEXroot": "test/main_summary.tex",
+		"builder_settings":
+		{
+			"windows":
+			{
+				"script_commands":
+				[
+					"python latex_summary.py test/main.tex"
+				]
+			}
+		},
+	},
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"*.bak",
+				"*.glo",
+				"*.bbl",
+				"*.blg",
+				"*.out",
+				"*.aux",
+				"*.log",
+				"*.toc",
+				"*.nlo",
+				"*.synctex.gz"
+			],
+			"path": "."
+		}
+	]
+}
