@@ -63,6 +63,8 @@ inside the summary document. These comments are:
 
  + `%!TODO: <your todo note>`
  + `%!SUMMARY: <your summary note>` (with any number of `M`s and `R`s).
+ + `%!MULTILINE: <continues the previous note>`
+ + `%!MUDDLE: <Creates an item coloured in green>`
 
 For these comments everything after the `:` is captured
 until a sentence terminating mark is encountered (`.!?`) or an end of line.
@@ -83,7 +85,7 @@ then be built by including it into a document (example below).
 
 \documentclass[]{memoir}
 \usepackage{enumitem}
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 
 \begin{document}
 

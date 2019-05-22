@@ -33,6 +33,7 @@ phrase_record_triggers = [
     capture_directive + r"TO+DO+ *:*" + capture_sentence,
     capture_directive + r"SU[M]+A[R]+Y" + capture_sentence,
     capture_directive + r"MULT[ILINE]*" + capture_sentence,
+    capture_directive + r"MUD+[LED]*" + capture_sentence,
 ]
 
 """
@@ -66,6 +67,7 @@ def build_summary_parse_re(commands, patterns):
     re_type = [dict({"item": True}) for _ in patterns]
     re_type[0]["todo"] = True
     re_type[2]["multiline"] = True
+    re_type[3]["muddle"] = True
     del re_type[2]["item"]
     re_type.extend([dict({"line": True}) for _ in commands])
     re_type[len(patterns)] = {"title": True}
@@ -202,6 +204,9 @@ def process_record(records, line, line_info, prev_record, n_section,):
     if record_is("todo", record_type) \
             or previous_record_is("todo", prev_record, record_type):
         record = todo_format.format(record)
+    if record_is("muddle", record_type) \
+            or previous_record_is("muddle", prev_record, record_type):
+        record = muddle_format.format(record)
     if record_is("item", record_type):
         record = item_str + record
     if "title" in record_type:
