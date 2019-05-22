@@ -35,7 +35,7 @@ phrase_record_triggers = [
     r"MULT[ILINE]*",
     r"MUD+[LED]*",
 ]
-
+re_comment = re.compile("\\s*%")
 
 def command_name_to_re_string(command):
     return r"^[^%]*(\\" + command + ".*)"
@@ -108,14 +108,43 @@ def parse_new_command(command, regex_type=default_command_type):
     summary_parse_re_types.append(dict(regex_type))
 
 
+def open_itemlist(records, start_item, end_item, item_str):
+    # runs if this is an item
+    # roll back until either:
+    # begin itemize is encountered
+    # end itemize
+    # an item
+    # or a section
+    #
+    # Skip comment lines and lines with non item text
+
+    prev_rec = -1
+    flag = True
+    while flag:
+        if -prev_rec > len(records):
+            records.append(start_item)
+            flag = False
+        elif re_comment.match(records[prev_rec]):
+            prev_rec += -1
+        elif (records[prev_rec] == start_item
+              or records[prev_rec].find(item_str) >= 0):
+            flag = False
+        elif ("line" in detect_record(records[prev_rec])[0]
+              or records[prev_rec] == end_item):
+            records.append(start_item)
+            flag = False
+        else:
+            prev_rec -= 1
+    pass
+
+
 def close_itemlist(records, start_item, end_item, item_str):
-    # Find the most recent record not starting with a %
     prev_rec = -1
     flag = True
     while flag:
         if -prev_rec > len(records):
             return
-        if re.compile("\\s*%").match(records[prev_rec]):
+        if re_comment.match(records[prev_rec]):
             prev_rec += -1
         else:
             flag = False
@@ -232,6 +261,7 @@ def process_record(records, line, line_info, prev_record, n_section,):
             or previous_record_is("muddle", prev_record, record_type):
         record = muddle_format.format(record)
     if record_is("item", record_type):
+        open_itemlist(records['summary'], start_item, end_item, item_str)
         record = item_str + record
     if "title" in record_type:
         if record_type["title"]:
@@ -257,7 +287,7 @@ def process_record(records, line, line_info, prev_record, n_section,):
     if record_is("line", record_type):
         n_section += 1
         records['summary'].append(label_format.format(n_section))
-        records['summary'].append(start_item)
+        open_itemlist(records['summary'], start_item, end_item, item_str)
 
     if record_isnot("multiline", record_type):
         prev_record = record_type
