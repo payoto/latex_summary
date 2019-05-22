@@ -141,20 +141,22 @@ def open_itemlist(records, start_item, end_item, item_str):
 def close_itemlist(records, start_item, end_item, item_str):
     prev_rec = -1
     flag = True
+
     while flag:
         if -prev_rec > len(records):
-            return
-        if re_comment.match(records[prev_rec]):
-            prev_rec += -1
-        else:
             flag = False
-
-    if records[prev_rec] == start_item:
-        records.pop(prev_rec)
-        # needed to make sure the pdf breaks correctly
-        records.append(section_spacing)
-    elif "line" not in detect_record(records[prev_rec])[0]:
-        records.append(end_item)
+        elif re_comment.match(records[prev_rec]):
+            prev_rec += -1
+        elif records[prev_rec].find(item_str) >= 0:
+            records.append(end_item)
+            flag = False
+        elif records[prev_rec] == start_item:
+            records.pop(prev_rec)
+            flag = False
+        elif "line" in detect_record(records[prev_rec])[0]:
+            flag = False
+        else:
+            prev_rec -= 1
 
 
 def record_is(rec_str, record_type):
@@ -287,7 +289,6 @@ def process_record(records, line, line_info, prev_record, n_section,):
     if record_is("line", record_type):
         n_section += 1
         records['summary'].append(label_format.format(n_section))
-        open_itemlist(records['summary'], start_item, end_item, item_str)
 
     if record_isnot("multiline", record_type):
         prev_record = record_type
