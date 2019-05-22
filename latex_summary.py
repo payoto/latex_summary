@@ -20,8 +20,8 @@ line_record_triggers = [
     r"title",
     r"maketitle",
     r"chapter",
-    r"paragraph",
     r"[sub]*section",
+    r"paragraph",
     r"appendix",
     r"[a-z]*matter",
     r"pagenumbering",
@@ -36,6 +36,7 @@ phrase_record_triggers = [
     r"MUD+[LED]*",
 ]
 re_comment = re.compile("\\s*%")
+
 
 def command_name_to_re_string(command):
     return r"^[^%]*(\\" + command + ".*)"
@@ -86,6 +87,8 @@ def build_summary_parse_re(commands, patterns):
     re_type.extend([dict({"line": True}) for _ in commands])
     re_type[len(patterns)] = {"title": True}
     re_type[len(patterns) + 1] = {"title": False}
+    re_type[len(patterns) + 2]["section"] = True
+    re_type[len(patterns) + 3]["section"] = True
 
     re_strings = [pattern_name_to_re_string(p) for p in patterns]
     re_strings.extend([command_name_to_re_string(c) for c in commands])
@@ -127,7 +130,7 @@ def open_itemlist(records, start_item, end_item, item_str):
         elif re_comment.match(records[prev_rec]):
             prev_rec += -1
         elif (records[prev_rec] == start_item
-              or records[prev_rec].find(item_str) >= 0):
+              or item_str in records[prev_rec]):
             flag = False
         elif ("line" in detect_record(records[prev_rec])[0]
               or records[prev_rec] == end_item):
@@ -141,23 +144,32 @@ def open_itemlist(records, start_item, end_item, item_str):
 def close_itemlist(records, start_item, end_item, item_str):
     prev_rec = -1
     flag = True
-
+    flag_text = False
     while flag:
         if -prev_rec > len(records):
             flag = False
-        elif re_comment.match(records[prev_rec]):
+        elif re_comment.match(records[prev_rec]) or\
+                r"\label" == records[prev_rec][:len(r"\label")]:
             prev_rec += -1
-        elif records[prev_rec].find(item_str) >= 0:
+        elif item_str in records[prev_rec]:
             records.append(end_item)
             flag = False
+            flag_text = True
         elif records[prev_rec] == start_item:
             records.pop(prev_rec)
-            records.append(section_spacing)
+            if record_is("section", detect_record(records[prev_rec])[0]) \
+                    and not flag_text:
+                records.append(section_spacing)
             flag = False
         elif "line" in detect_record(records[prev_rec])[0]:
-            records.append(section_spacing)
+            if record_is("section", detect_record(records[prev_rec])[0]) \
+                    and not flag_text:
+                records.append(section_spacing)
             flag = False
         else:
+            print("flag_text raised by " + records[prev_rec])
+            print(detect_record(records[prev_rec])[0])
+            flag_text = True
             prev_rec -= 1
 
 
