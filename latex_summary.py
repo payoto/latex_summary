@@ -30,12 +30,32 @@ line_record_triggers = [
 capture_directive = r"%! *"
 capture_sentence = r" *:* *([^\.!\?]*[\.!\?]*)"
 phrase_record_triggers = [
-    capture_directive + r"TO+DO+ *:*" + capture_sentence,
-    capture_directive + r"SU[M]+A[R]+Y" + capture_sentence,
-    capture_directive + r"MULT[ILINE]*" + capture_sentence,
+    r"TO+DO+",
+    r"SU[M]+A[R]+Y",
+    r"MULT[ILINE]*",
+    r"MUD+[LED]*",
 ]
 
+
+def command_name_to_re_string(command):
+    return r"^[^%]*(\\" + command + ".*)"
+
+
+def pattern_name_to_re_string(pattern):
+    return capture_directive + pattern + capture_sentence
+
+
+"""
+LaTeX output formatting module attributes.
+"""
 section_spacing = r"\vspace{-36pt}\hspace{11pt}"
+start_item = "    \\begin{itemize}[noitemsep]"
+end_item = "    \\end{itemize}"
+item_str = "        \\item "
+todo_format = "{{\color{{red}}{0}}}"
+muddle_format = "{{\color{{OliveGreen}}{0}}}"
+label_format = "\label{{autosec:{0}}}"
+ref_format = "\\ref{{autosec:{0}}}"
 
 
 def build_regex_list(patterns):
@@ -45,30 +65,47 @@ def build_regex_list(patterns):
 def build_file_parse_re(commands):
 
     file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;]"
-    # file_capture = r"\{[^\{\}]*\}"
     patterns = [r"^[^%]*\\" + c + file_capture for c in commands]
 
     return build_regex_list(patterns)
 
 
+default_pattern_type = {"item": True}
+default_command_type = {"line": True}
+
+
 def build_summary_parse_re(commands, patterns):
 
+    # Set all patterns type as "item" -> will trigger a new item
     re_type = [dict({"item": True}) for _ in patterns]
     re_type[0]["todo"] = True
     re_type[2]["multiline"] = True
+    re_type[3]["muddle"] = True
     del re_type[2]["item"]
+
     re_type.extend([dict({"line": True}) for _ in commands])
     re_type[len(patterns)] = {"title": True}
     re_type[len(patterns) + 1] = {"title": False}
-    patterns.extend(
-        [r"^[^%]*(\\" + c + ".*)" for c in commands]
-    )
-    return build_regex_list(patterns), re_type
+
+    re_strings = [pattern_name_to_re_string(p) for p in patterns]
+    re_strings.extend([command_name_to_re_string(c) for c in commands])
+
+    return build_regex_list(re_strings), re_type
 
 
 file_parse_re = build_file_parse_re(file_parse_triggers)
 summary_parse_re, summary_parse_re_types = build_summary_parse_re(
     line_record_triggers, phrase_record_triggers)
+
+
+def parse_new_pattern(pattern, regex_type=default_pattern_type):
+    summary_parse_re.append(re.compile(pattern_name_to_re_string(pattern)))
+    summary_parse_re_types.append(dict(regex_type))
+
+
+def parse_new_command(command, regex_type=default_command_type):
+    summary_parse_re.append(re.compile(command_name_to_re_string(command)))
+    summary_parse_re_types.append(dict(regex_type))
 
 
 def close_itemlist(records, start_item, end_item, item_str):
@@ -104,21 +141,13 @@ def previous_record_is(rec_str, prev_record, record_type):
         record_is("multiline", record_type)
 
 
-def parse_file(
-    file_in,
-    records={'title': [], 'todos': [], 'summary': []},
-    n_stacks=0,
-    n_section=0,
-):
+def parse_file(file_in,
+               records={'title': [], 'todos': [], 'summary': []},
+               n_stacks=0,
+               n_section=0,
+               ):
+
     records['summary'].append("% Start file : " + file_in)
-    start_item = "    \\begin{itemize}[noitemsep]"
-    end_item = "    \\end{itemize}"
-    item_str = "        \\item "
-    todo_format = "{{\color{{red}}{0}}}"
-    label_format = "\label{{autosec:{0}}}"
-    ref_format = "\\ref{{autosec:{0}}}"
-    current_label = label_format.format(n_section)
-    current_ref = ref_format.format(n_section)
     prev_record = {}
     if n_stacks == 0:
         records['todos'].append(r"\section{List of To-dos}")
@@ -128,46 +157,12 @@ def parse_file(
         for line_num, line in enumerate(f):
 
             line_info = "        % " + file_in + ":" + str(line_num + 1)
-            record_type, record = detect_record(line)
 
-            if record_is("line", record_type):
-                close_itemlist(records['summary'],
-                               start_item, end_item, item_str)
-            if record_is("todo", record_type) \
-                    or previous_record_is("todo", prev_record, record_type):
-                record = todo_format.format(record)
-            if record_is("item", record_type):
-                record = item_str + record
-            if "title" in record_type:
-                if record_type["title"]:
-                    record = re.sub(r"\\title\s*\{",
-                                    r"\\title{Summary of : ", record)
-                records["title"].append(record)
-                record_type = {}  # Stop it being recorded in the main text
-
-            if record_type and record_isnot("newline", record_type):
-                records['summary'].append(record)
-                records['summary'].append(line_info)
-
-            if record_is("todo", record_type) or \
-                    previous_record_is("todo", prev_record, record_type):
-                if record_is("todo", record_type):
-                    records['todos'].append(
-                        record + " (section~{0})".format(current_ref))
-                else:
-                    records['todos'].append(record)
-
-                records['todos'].append(line_info)
-
-            if record_is("line", record_type):
-                n_section += 1
-                current_label = label_format.format(n_section)
-                current_ref = ref_format.format(n_section)
-                records['summary'].append(current_label)
-                records['summary'].append(start_item)
-
-            if record_isnot("multiline", record_type):
-                prev_record = record_type
+            prev_record, n_section = process_record(records,
+                                                    line,
+                                                    line_info,
+                                                    prev_record,
+                                                    n_section)
 
             next_file = detect_file(line, file_in)
             if next_file:
@@ -221,6 +216,53 @@ def detect_record(line):
         record_type = pat_type
 
     return record_type, record
+
+
+def process_record(records, line, line_info, prev_record, n_section,):
+
+    record_type, record = detect_record(line)
+
+    if record_is("line", record_type):
+        close_itemlist(records['summary'],
+                       start_item, end_item, item_str)
+    if record_is("todo", record_type) \
+            or previous_record_is("todo", prev_record, record_type):
+        record = todo_format.format(record)
+    if record_is("muddle", record_type) \
+            or previous_record_is("muddle", prev_record, record_type):
+        record = muddle_format.format(record)
+    if record_is("item", record_type):
+        record = item_str + record
+    if "title" in record_type:
+        if record_type["title"]:
+            record = re.sub(r"\\title\s*\{",
+                            r"\\title{Summary of : ", record)
+        records["title"].append(record)
+        record_type = {}  # Stop it being recorded in the main text
+
+    if record_type and record_isnot("newline", record_type):
+        records['summary'].append(record)
+        records['summary'].append(line_info)
+
+    if record_is("todo", record_type) or \
+            previous_record_is("todo", prev_record, record_type):
+        if record_is("todo", record_type):
+            records['todos'].append(
+                record + " (section~{0})".format(ref_format.format(n_section)))
+        else:
+            records['todos'].append(record)
+
+        records['todos'].append(line_info)
+
+    if record_is("line", record_type):
+        n_section += 1
+        records['summary'].append(label_format.format(n_section))
+        records['summary'].append(start_item)
+
+    if record_isnot("multiline", record_type):
+        prev_record = record_type
+
+    return prev_record, n_section
 
 
 def write_records(records, file_name, name_change='_auto_summary'):
