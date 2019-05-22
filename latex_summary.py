@@ -152,8 +152,10 @@ def close_itemlist(records, start_item, end_item, item_str):
             flag = False
         elif records[prev_rec] == start_item:
             records.pop(prev_rec)
+            records.append(section_spacing)
             flag = False
         elif "line" in detect_record(records[prev_rec])[0]:
+            records.append(section_spacing)
             flag = False
         else:
             prev_rec -= 1
