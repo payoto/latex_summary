@@ -21,6 +21,7 @@ line_record_triggers = [
     r"maketitle",
     r"chapter",
     r"[sub]*section",
+    r"frontmatter",
     r"paragraph",
     r"appendix",
     r"[a-z]*matter",
@@ -85,10 +86,11 @@ def build_summary_parse_re(commands, patterns):
     del re_type[2]["item"]
 
     re_type.extend([dict({"line": True}) for _ in commands])
-    re_type[len(patterns)] = {"title": True}
-    re_type[len(patterns) + 1] = {"title": False}
-    re_type[len(patterns) + 2]["section"] = True
-    re_type[len(patterns) + 3]["section"] = True
+    re_type[len(patterns)] = {"title": True}  # \title{}
+    re_type[len(patterns) + 1] = {"title": False}  # \maketitle
+    re_type[len(patterns) + 2]["section"] = True  # \chapter{}
+    re_type[len(patterns) + 3]["section"] = True  # \[sub]*section{}
+    re_type[len(patterns) + 4] = {"title": False}  # \frontmatter
 
     re_strings = [pattern_name_to_re_string(p) for p in patterns]
     re_strings.extend([command_name_to_re_string(c) for c in commands])
