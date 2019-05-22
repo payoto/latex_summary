@@ -30,11 +30,20 @@ line_record_triggers = [
 capture_directive = r"%! *"
 capture_sentence = r" *:* *([^\.!\?]*[\.!\?]*)"
 phrase_record_triggers = [
-    capture_directive + r"TO+DO+ *:*" + capture_sentence,
-    capture_directive + r"SU[M]+A[R]+Y" + capture_sentence,
-    capture_directive + r"MULT[ILINE]*" + capture_sentence,
-    capture_directive + r"MUD+[LED]*" + capture_sentence,
+    r"TO+DO+",
+    r"SU[M]+A[R]+Y",
+    r"MULT[ILINE]*",
+    r"MUD+[LED]*",
 ]
+
+
+def command_name_to_re_string(command):
+    return r"^[^%]*(\\" + command + ".*)"
+
+
+def pattern_name_to_re_string(pattern):
+    return capture_directive + pattern + capture_sentence
+
 
 """
 LaTeX output formatting module attributes.
@@ -56,31 +65,47 @@ def build_regex_list(patterns):
 def build_file_parse_re(commands):
 
     file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;]"
-    # file_capture = r"\{[^\{\}]*\}"
     patterns = [r"^[^%]*\\" + c + file_capture for c in commands]
 
     return build_regex_list(patterns)
 
 
+default_pattern_type = {"item": True}
+default_command_type = {"line": True}
+
+
 def build_summary_parse_re(commands, patterns):
 
+    # Set all patterns type as "item" -> will trigger a new item
     re_type = [dict({"item": True}) for _ in patterns]
     re_type[0]["todo"] = True
     re_type[2]["multiline"] = True
     re_type[3]["muddle"] = True
     del re_type[2]["item"]
+
     re_type.extend([dict({"line": True}) for _ in commands])
     re_type[len(patterns)] = {"title": True}
     re_type[len(patterns) + 1] = {"title": False}
-    patterns.extend(
-        [r"^[^%]*(\\" + c + ".*)" for c in commands]
-    )
-    return build_regex_list(patterns), re_type
+
+    re_strings = [pattern_name_to_re_string(p) for p in patterns]
+    re_strings.extend([command_name_to_re_string(c) for c in commands])
+
+    return build_regex_list(re_strings), re_type
 
 
 file_parse_re = build_file_parse_re(file_parse_triggers)
 summary_parse_re, summary_parse_re_types = build_summary_parse_re(
     line_record_triggers, phrase_record_triggers)
+
+
+def parse_new_pattern(pattern, regex_type=default_pattern_type):
+    summary_parse_re.append(re.compile(pattern_name_to_re_string(pattern)))
+    summary_parse_re_types.append(dict(regex_type))
+
+
+def parse_new_command(command, regex_type=default_command_type):
+    summary_parse_re.append(re.compile(command_name_to_re_string(command)))
+    summary_parse_re_types.append(dict(regex_type))
 
 
 def close_itemlist(records, start_item, end_item, item_str):
