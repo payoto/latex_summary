@@ -3,8 +3,8 @@
 
 \section{Parser results}
     \begin{itemize}[noitemsep]
-\item \textbf{sections}: 9 were detected.
-\item \textbf{todos}: 5 were detected.
+\item \textbf{sections}: 10 were detected.
+\item \textbf{todos}: 6 were detected.
 \item \textbf{summarys}: 4 were detected.
 \item \textbf{muddles}: 2 were detected.
 \item \textbf{plans}: 1 were detected.
@@ -25,6 +25,8 @@
 {\color{red}This should match the previous sentence.}
         % test\test_latex_summary2.tex:8
         \item {\color{red}Import a file.} (section~\ref{autosec:9})
+        % test\import_test/file_import.tex:11
+        \item {\color{red}Import a file.} (section~\ref{autosec:10})
         % test\import_test/file_import.tex:11
     \end{enumerate}
 
@@ -127,6 +129,17 @@ This should match the previous sentence.
 \chapter{Test import}
         % test\import_test/file_import.tex:1
 \label{autosec:8}
+This doesn't work yet.
+        % test\import_test/file_import.tex:2
+    \begin{itemize}[noitemsep]
+        \item {\color{red}Import a file.}
+        % test\import_test/file_import.tex:11
+% End file : test\import_test/file_import.tex
+% Start file : test\import_test/file_import.tex
+    \end{itemize}
+\chapter{Test import}
+        % test\import_test/file_import.tex:1
+\label{autosec:9}
 This doesn't work yet.
         % test\import_test/file_import.tex:2
     \begin{itemize}[noitemsep]

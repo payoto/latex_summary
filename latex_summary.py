@@ -246,10 +246,11 @@ def detect_file(line, current_file):
         next_file = ""
         file_capture_re = re.compile(file_capture)
         while m:
-            next_file += m.group(1)
+            next_file += m.group(1).strip()
             m = file_capture_re.search(m.group(2))
 
-        next_file += ".tex"
+        if not os.path.splitext(next_file)[1]:
+            next_file += ".tex"
 
         if not os.path.exists(next_file):
             next_file_test = next_file
