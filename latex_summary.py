@@ -255,13 +255,17 @@ def detect_file(line, current_file):
         if not os.path.exists(next_file):
             next_file_test = next_file
             base_path = current_file
-            while not os.path.exists(next_file_test):
+            while not os.path.exists(next_file_test) and base_path:
                 base_path, _ = os.path.split(base_path)
                 next_file_test = os.path.join(base_path, next_file)
             if os.path.exists(next_file_test):
                 next_file = next_file_test
             else:
-                raise IOError("File could not be found.")
+                raise IOError(
+                    "File input command detected but the file could not"
+                    " be found. \n line : '{0}'\n\n If the latex document "
+                    "compiles with this command report this error as an issue"
+                    " on github.".format(line))
 
             pass
 

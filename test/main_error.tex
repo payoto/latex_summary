@@ -1,0 +1,15 @@
+%!TEX root = main.tex
+\documentclass[]{memoir}
+\usepackage{enumitem}
+\usepackage{import}
+
+\title{Test document}
+
+
+\begin{document}
+
+\maketitle
+% This line should throw an error IOError
+\import{import_test/}{file}
+
+\end{document}
