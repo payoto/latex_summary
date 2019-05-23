@@ -210,8 +210,8 @@ def parse_file(file_in,
         records['todos'].append(start_enum)
 
     with open(file_in, 'r') as f:
-        for line_num, line in enumerate(f):
-
+        for line_num, lines in enumerate(f):
+            line = lines.splitlines()[0]
             line_info = "        % " + file_in + ":" + str(line_num + 1)
 
             prev_record, counters = process_record(records,
