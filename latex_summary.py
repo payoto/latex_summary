@@ -7,7 +7,7 @@ a summary.
 import os
 import re
 import sys
-
+import pdb
 
 file_parse_triggers = [
     r"input",
@@ -27,6 +27,7 @@ line_record_triggers = [
     r"[a-z]*matter",
     r"pagenumbering",
 ]
+file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;](.*)"
 
 capture_directive = r"%! *"
 capture_sentence = r" *:* *([^\.!\?]*[\.!\?]*)"
@@ -68,7 +69,6 @@ def build_regex_list(patterns):
 
 def build_file_parse_re(commands):
 
-    file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;]"
     patterns = [r"^[^%]*\\" + c + file_capture for c in commands]
 
     return build_regex_list(patterns)
@@ -238,12 +238,18 @@ def parse_file(file_in,
 def detect_file(line, current_file):
     next_file = None
 
-    for file_re in file_parse_re:
+    for index_re, file_re in enumerate(file_parse_re):
         m = file_re.search(line)
         if m:
             break
     if m:
-        next_file = m.group(1) + ".tex"
+        next_file = ""
+        file_capture_re = re.compile(file_capture)
+        while m:
+            next_file += m.group(1)
+            m = file_capture_re.search(m.group(2))
+
+        next_file += ".tex"
 
         if not os.path.exists(next_file):
             next_file_test = next_file

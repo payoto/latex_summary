@@ -1,5 +1,7 @@
+%!TEX root = main.tex
 \documentclass[]{memoir}
 \usepackage{enumitem}
+\usepackage{import}
 
 \title{Test document}
 
@@ -10,5 +12,7 @@
 
 \input{test_latex_summary}
 \input{test_latex_summary2}
+
+\import{import_test/}{file_import}
 
 \end{document}
