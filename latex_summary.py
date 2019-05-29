@@ -30,7 +30,10 @@ line_record_triggers = [
 file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;](.*)"
 
 capture_directive = r"%! *"
-capture_sentence = r" *:* *([^\.!\?]*[\.!\?]*)"
+end_of_keyword = r" *:* *"
+capture_sentence = end_of_keyword + r"([^\.!\?]*[\.!\?]*)"
+capture_linedirective = capture_directive + r"EOL[ _]*"
+capture_restofline = end_of_keyword + r"(.*)"
 phrase_record_triggers = [
     r"TO+DO+",
     r"SU[M]+A[R]+Y",
@@ -45,8 +48,9 @@ def command_name_to_re_string(command):
     return r"^[^%]*(\\" + command + ".*)"
 
 
-def pattern_name_to_re_string(pattern):
-    return capture_directive + pattern + capture_sentence
+def pattern_name_to_re_string(pattern, *, startofre=capture_directive,
+                              endofre=capture_sentence):
+    return startofre + pattern + endofre
 
 
 """
@@ -105,6 +109,11 @@ def build_summary_parse_re(commands, patterns):
 
     re_strings = [pattern_name_to_re_string(p) for p in patterns]
     re_strings.extend([command_name_to_re_string(c) for c in commands])
+    re_strings.extend([
+        pattern_name_to_re_string(
+            p, startofre=capture_linedirective,
+            endofre=capture_restofline) for p in patterns])
+    re_type.extend([dict(re_type[i]) for i in range(len(patterns))])
 
     return build_regex_list(re_strings), re_type
 

@@ -65,9 +65,16 @@ inside the summary document. These comments are:
  + `%!SUMMARY: <your summary note>` (with any number of `M`s and `R`s).
  + `%!MULTILINE: <continues the previous note>`
  + `%!MUDDLE: <Creates an item coloured in green>`
+ + `%!PLAN: <Your planned text/section will appear in blue>`
 
 For these comments everything after the `:` is captured
 until a sentence terminating mark is encountered (`.!?`) or an end of line.
+Any of these comment formats can be altered to go to the end of line, ignoring
+sentence terminating punctuation by prepending them with `EOL[ _]*`, valid formats are:
+
+ + `%!EOL TODO...`
+ + `%!EOL_TODO...`
+ + `%!EOLTODO...`
 
 
 ### Building the summary document ###
