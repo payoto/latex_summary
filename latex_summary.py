@@ -40,6 +40,7 @@ phrase_record_triggers = [
     r"MULT[ILINE]*",
     r"MUD+[LED]*",
     r"PLAN",
+    r"REP[EA]*[TION]*",
 ]
 re_comment = re.compile("\\s*%")
 
@@ -96,6 +97,8 @@ def build_summary_parse_re(commands, patterns):
     re_type[3]["count"] = "muddle"
     re_type[4]["color"] = "blue"
     re_type[4]["count"] = "plan"
+    re_type[5]["color"] = "DarkOrchid"
+    re_type[5]["count"] = "repetition"
     del re_type[2]["item"]
 
     re_type.extend([dict({"line": True}) for _ in commands])

@@ -64,8 +64,9 @@ inside the summary document. These comments are:
  + `%!TODO: <your todo note>`
  + `%!SUMMARY: <your summary note>` (with any number of `M`s and `R`s).
  + `%!MULTILINE: <continues the previous note>`
- + `%!MUDDLE: <Creates an item coloured in green>`
+ + `%!MUDDLE: <Creates an item coloured in OliveGreen>`
  + `%!PLAN: <Your planned text/section will appear in blue>`
+ + `%!REPEAT: <repeated idea here in DarkOrchid>`
 
 For these comments everything after the `:` is captured
 until a sentence terminating mark is encountered (`.!?`) or an end of line.
@@ -104,10 +105,13 @@ then be built by including it into a document (example below).
 
 A working example is available in the `test/` folder.
 
-## Limitations ##
+## Limitations and known issues ##
 
  + Parses text one by line: section names must be finished before a line 
  ending is encountered. 
+ + Using package `xcolor` can play up if also using package `tikz` leading to 
+ undefined color names when trying to build documents. In that case replace:
+ `\usepackage[dvipsnames]{xcolor}` with `\documentclass[usenames,dvipsnames]{beamer}`.
 
 
 ## Sublime Text Integration ##
