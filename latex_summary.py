@@ -33,16 +33,6 @@ file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;](.*)"
 default_pattern_type = {"item": True}
 default_command_type = {"line": True}
 
-recognise_directive = r"%! *"
-end_of_keyword = r" *:* *"
-capture_sentence = r"([^\.!\?]*[\.!\?]*)"
-
-modifier_fullline = r"EOL[ _]*"
-modifier_noitem = r"NI[ _]*"
-capture_restofline = end_of_keyword + r"(.*)"
-
-capture_specifiers = {}
-
 phrase_record_triggers = [
     r"TO+DO+",
     r"SU[M]+A[R]+Y",
@@ -51,36 +41,59 @@ phrase_record_triggers = [
     r"PLAN",
     r"REP[EA]*[TION]*",
 ]
+
 re_comment = re.compile("\\s*%")
 
+recognise_directive = r"%! *"
+end_of_keyword = r" *:* *"
+capture_sentence = r"([^\.!\?]*[\.!\?]*)"
 
-def define_capture_specifiers(capture_specifiers):
+modifier_fullline = r"EOL[ _]*"
+modifier_noitem = r"NI[ _]*"
+capture_restofline = r"(.*)"
+
+input_str = '__INPUT__'
+
+default_specifier = {
+    'recognise': recognise_directive,  # The pattern to recognise at the start
+    'pattern_prefix': '',  # Allows a change of behaviour with a prefix
+    'precapture': end_of_keyword,  # After the pattern, to be discarded
+    'capture': capture_sentence,  # What is read and copied into the summary
+    'typemodif': {},  # Dictionary modification from the default type
+    # The order in which fields are set
+    're_fields': ['recognise', 'pattern_prefix', input_str,
+                  'precapture', 'capture']
+}
+partial_specifiers = {
+    'full_line': {
+        'pattern_prefix': modifier_fullline,
+        'capture': capture_restofline,
+    },
+    'not_item': {
+        'pattern_prefix': modifier_noitem,
+        'typemodif': {"item": False},
+    },
+}
+
+
+def generate_capture_specifiers(default_specifier, partial_specifiers):
     capture_specifiers = {
-        'default': {
-            'recognise': recognise_directive,
-            'pattern_modifier': '',
-            'precapture': end_of_keyword,
-            'capture': capture_sentence,
-            'typemodif': {},
-            're_fields': ['recognise', 'pattern_modifier', 'input',
-                          'precapture', 'capture']
-        },
+        'default': dict(default_specifier),
     }
 
-    new_spec = 'full_line'
-    capture_specifiers[new_spec] = dict(capture_specifiers['default'])
-    capture_specifiers[new_spec]['pattern_modifier'] = modifier_fullline
-    capture_specifiers[new_spec]['capture'] = capture_restofline
-
-    new_spec = 'not_item'
-    capture_specifiers[new_spec] = dict(capture_specifiers['default'])
-    capture_specifiers[new_spec]['pattern_modifier'] = modifier_noitem
-    capture_specifiers[new_spec]['typemodif'] = {"item": False}
+    for new_spec in partial_specifiers:
+        if input_str in partial_specifiers[new_spec]:
+            raise KeyError(
+                "Key '{0}' is reserved and cannot be in "
+                "partial_specifiers['{1}']".format(input_str, new_spec))
+        capture_specifiers[new_spec] = {
+            **default_specifier, **partial_specifiers[new_spec]}
 
     return capture_specifiers
 
 
-capture_specifiers = define_capture_specifiers(capture_specifiers)
+capture_specifiers = generate_capture_specifiers(
+    default_specifier, partial_specifiers)
 
 
 def command_name_to_re_string(command):
@@ -91,7 +104,7 @@ def pattern_name_to_re_string(pattern,
                               capture_specifier=capture_specifiers['default']):
 
     specifier = dict(capture_specifier)
-    specifier['input'] = pattern
+    specifier[input_str] = pattern
     re_str = ''
 
     for field in specifier['re_fields']:
