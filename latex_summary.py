@@ -58,21 +58,23 @@ def define_capture_specifiers(capture_specifiers):
     capture_specifiers = {
         'default': {
             'recognise': recognise_directive,
+            'pattern_modifier': '',
             'precapture': end_of_keyword,
             'capture': capture_sentence,
             'typemodif': {},
-            're_fields': ['recognise', 'input', 'precapture', 'capture']
+            're_fields': ['recognise', 'pattern_modifier', 'input',
+                          'precapture', 'capture']
         },
     }
 
     new_spec = 'full_line'
     capture_specifiers[new_spec] = dict(capture_specifiers['default'])
-    capture_specifiers[new_spec]['recognise'] += modifier_fullline
+    capture_specifiers[new_spec]['pattern_modifier'] = modifier_fullline
     capture_specifiers[new_spec]['capture'] = capture_restofline
 
     new_spec = 'not_item'
     capture_specifiers[new_spec] = dict(capture_specifiers['default'])
-    capture_specifiers[new_spec]['recognise'] += modifier_noitem
+    capture_specifiers[new_spec]['pattern_modifier'] = modifier_noitem
     capture_specifiers[new_spec]['typemodif'] = {"item": False}
 
     return capture_specifiers
@@ -405,12 +407,17 @@ def process_record(records, line, line_info, prev_record, nums,):
         records['summary'].append(line_info)
 
     if records_are("todo", prev_record, record_type):
+        todo_record = record
+        if not record_is("item", record_type) \
+                and not record_is("multiline", record_type):
+            todo_record = item_str + record
+
         if record_is("todo", record_type):
             records['todos'].append(
-                record
+                todo_record
                 + " (section~{0})".format(ref_format.format(nums["section"])))
         else:
-            records['todos'].append(record)
+            records['todos'].append(todo_record)
 
         records['todos'].append(line_info)
 
