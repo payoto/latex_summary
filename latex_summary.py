@@ -29,11 +29,20 @@ line_record_triggers = [
 ]
 file_capture = r"[\{\,\;] *([^\(\)\{\}\|\,\;]*) *[\}\,\;](.*)"
 
-capture_directive = r"%! *"
+
+default_pattern_type = {"item": True}
+default_command_type = {"line": True}
+
+recognise_directive = r"%! *"
 end_of_keyword = r" *:* *"
-capture_sentence = end_of_keyword + r"([^\.!\?]*[\.!\?]*)"
-capture_linedirective = capture_directive + r"EOL[ _]*"
+capture_sentence = r"([^\.!\?]*[\.!\?]*)"
+
+modifier_fullline = r"EOL[ _]*"
+modifier_noitem = r"NI[ _]*"
 capture_restofline = end_of_keyword + r"(.*)"
+
+capture_specifiers = {}
+
 phrase_record_triggers = [
     r"TO+DO+",
     r"SU[M]+A[R]+Y",
@@ -45,13 +54,47 @@ phrase_record_triggers = [
 re_comment = re.compile("\\s*%")
 
 
+def define_capture_specifiers(capture_specifiers):
+    capture_specifiers = {
+        'default': {
+            'recognise': recognise_directive,
+            'precapture': end_of_keyword,
+            'capture': capture_sentence,
+            'typemodif': {},
+            're_fields': ['recognise', 'input', 'precapture', 'capture']
+        },
+    }
+
+    new_spec = 'full_line'
+    capture_specifiers[new_spec] = dict(capture_specifiers['default'])
+    capture_specifiers[new_spec]['recognise'] += modifier_fullline
+    capture_specifiers[new_spec]['capture'] = capture_restofline
+
+    new_spec = 'not_item'
+    capture_specifiers[new_spec] = dict(capture_specifiers['default'])
+    capture_specifiers[new_spec]['recognise'] += modifier_noitem
+    capture_specifiers[new_spec]['typemodif'] = {"item": False}
+
+    return capture_specifiers
+
+
+capture_specifiers = define_capture_specifiers(capture_specifiers)
+
+
 def command_name_to_re_string(command):
     return r"^[^%]*(\\" + command + ".*)"
 
 
-def pattern_name_to_re_string(pattern, *, startofre=capture_directive,
-                              endofre=capture_sentence):
-    return startofre + pattern + endofre
+def pattern_name_to_re_string(pattern,
+                              capture_specifier=capture_specifiers['default']):
+
+    specifier = dict(capture_specifier)
+    specifier['input'] = pattern
+    re_str = ''
+
+    for field in specifier['re_fields']:
+        re_str += specifier[field]
+    return re_str
 
 
 """
@@ -79,44 +122,52 @@ def build_file_parse_re(commands):
     return build_regex_list(patterns)
 
 
-default_pattern_type = {"item": True}
-default_command_type = {"line": True}
-
-
 def build_summary_parse_re(commands, patterns):
 
     # Set all patterns type as "item" -> will trigger a new item
-    re_type = [dict({"item": True}) for _ in patterns]
-    re_type[0]["todo"] = True
-    re_type[0]["color"] = "red"
-    re_type[0]["count"] = "todo"
-    re_type[1]["count"] = "summary"
-    re_type[2]["multiline"] = True
-    re_type[3]["muddle"] = True
-    re_type[3]["color"] = "OliveGreen"
-    re_type[3]["count"] = "muddle"
-    re_type[4]["color"] = "blue"
-    re_type[4]["count"] = "plan"
-    re_type[5]["color"] = "DarkOrchid"
-    re_type[5]["count"] = "repetition"
-    del re_type[2]["item"]
+    cmd_offset = 0
+    pat_offset = len(commands)
+    pat_range = range(pat_offset, pat_offset + len(patterns))
+    re_type = []
+    re_strings = []
 
-    re_type.extend([dict({"line": True}) for _ in commands])
-    re_type[len(patterns)] = {"title": True}  # \title{}
-    re_type[len(patterns) + 1] = {"title": False}  # \maketitle
-    re_type[len(patterns) + 2]["section"] = True  # \chapter{}
-    re_type[len(patterns) + 2]["count"] = "section"  # \chapter{}
-    re_type[len(patterns) + 3]["section"] = True  # \[sub]*section{}
-    re_type[len(patterns) + 3]["count"] = "section"  # \[sub]*section{}
-    re_type[len(patterns) + 4] = {"title": False}  # \frontmatter
+    re_type.extend([dict(default_command_type) for _ in commands])
+    re_type.extend([dict(default_pattern_type) for _ in patterns])
 
-    re_strings = [pattern_name_to_re_string(p) for p in patterns]
+    re_type[pat_offset + 0]["todo"] = True
+    re_type[pat_offset + 0]["color"] = "red"
+    re_type[pat_offset + 0]["count"] = "todo"
+    re_type[pat_offset + 1]["count"] = "summary"
+    re_type[pat_offset + 2]["multiline"] = True
+    re_type[pat_offset + 2]["item"] = False
+    re_type[pat_offset + 3]["muddle"] = True
+    re_type[pat_offset + 3]["color"] = "OliveGreen"
+    re_type[pat_offset + 3]["count"] = "muddle"
+    re_type[pat_offset + 4]["color"] = "blue"
+    re_type[pat_offset + 4]["count"] = "plan"
+    re_type[pat_offset + 5]["color"] = "DarkOrchid"
+    re_type[pat_offset + 5]["count"] = "repetition"
+
+    re_type[cmd_offset + 0] = {"title": True}  # \title{}
+    re_type[cmd_offset + 1] = {"title": False}  # \maketitle
+    re_type[cmd_offset + 2]["section"] = True  # \chapter{}
+    re_type[cmd_offset + 2]["count"] = "section"  # \chapter{}
+    re_type[cmd_offset + 3]["section"] = True  # \[sub]*section{}
+    re_type[cmd_offset + 3]["count"] = "section"  # \[sub]*section{}
+    re_type[cmd_offset + 4] = {"title": False}  # \frontmatter
+
     re_strings.extend([command_name_to_re_string(c) for c in commands])
-    re_strings.extend([
-        pattern_name_to_re_string(
-            p, startofre=capture_linedirective,
-            endofre=capture_restofline) for p in patterns])
-    re_type.extend([dict(re_type[i]) for i in range(len(patterns))])
+
+    for spec in capture_specifiers:
+        re_strings.extend([
+            pattern_name_to_re_string(p, capture_specifiers[spec])
+            for p in patterns])
+        if spec != 'default':
+            modifiers = capture_specifiers[spec]['typemodif']
+            for i in pat_range:
+                re_type.append(dict(re_type[i]))
+                for modif in modifiers:
+                    re_type[-1][modif] = modifiers[modif]
 
     return build_regex_list(re_strings), re_type
 
