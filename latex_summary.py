@@ -7,7 +7,6 @@ a summary.
 import os
 import re
 import sys
-import pdb
 
 file_parse_triggers = [
     r"input",

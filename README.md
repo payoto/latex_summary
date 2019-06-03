@@ -36,10 +36,10 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 Into a summarised LaTeX document:
 ```latex
 \section{Sample section}
-    \begin{itemize}[noitemsep]
-        \item Actually put text instead of lorem ipsum.
-        \item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-    \end{itemize}
+	\begin{itemize}[noitemsep]
+		\item Actually put text instead of lorem ipsum.
+		\item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+	\end{itemize}
 \subsection{Sample subsection}
 ```
 
@@ -117,10 +117,14 @@ A working example is available in the `test/` folder.
 ## Sublime Text Integration ##
  
 A nicer integration in sublime text can be achieved by adding snippets.
-These allow auto completion using less verbose shortcuts. The following two are included:
+These allow auto completion using less verbose shortcuts. The following six are included:
  
  + Type `%todo` <kbd>TAB</kbd> completes to `%!TODO: `
  + Type `%sum` <kbd>TAB</kbd> completes to `%!SUMMARY: `
+ + Type `%mud` <kbd>TAB</kbd> completes to `%!MUDDLE: `
+ + Type `%plan` <kbd>TAB</kbd> completes to `%!PLAN: `
+ + Type `%mult` <kbd>TAB</kbd> completes to `%!MULT: `
+ + Type `%rep` <kbd>TAB</kbd> completes to `%!REPEAT: `
 
 
 #### Snippet to add a todo:
@@ -135,19 +139,62 @@ These allow auto completion using less verbose shortcuts. The following two are 
 </snippet>
 ```
 
-#### Snippet to add a summary item:
+#### Snippet to add a other items:
+
+How to make your own snippet for a custom trigger, replace text surrounded by `|`:
 
 ```html
 <snippet>
 	<content><![CDATA[
-%!SUMMARY: ${1:this}.
+%!|TYPE OF ITEM|: ${1:this}.
 ]]></content>
 		<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>%sum</tabTrigger>
+	<tabTrigger>|SHORT FORM|</tabTrigger>
 		<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>text.tex.latex</scope>
 </snippet>
 ```
+
+### Tips ###
+
+I like to have highlighting of the ToDos, the plans and the muddles in the text. This can
+be done with the 
+[HighlightWords package](https://packagecontrol.io/packages/HighlightWords).
+Settings need to be customised the values to set for good integration are:
+
+```json
+{
+	"permanent_highlight_keyword_color_mappings": [
+		{
+			"keyword": "%! *(NI[_ ]*| *)TODO\\h*:[^.!?\n]*[.!?]*(\\n\\h*%!\\h*MULT.*)*",
+			"color": "string", "flag": 0
+		},
+		{
+			"keyword": "%! *EOL[_ ]*TODO\\h*:[^\n]*(\\n\\h*%!\\h*MULT.*)*",
+			"color": "string", "flag": 0
+		},
+		{
+			"keyword": "%! *(NI[_ ]*| *)(MUDDLE|PLAN)\\h*:[^.!?\n]*[.!?]*(\\n\\h*%!\\h*MULT.*)*",
+			"color": "text.tex.latex ", "flag": 0
+		},
+		{
+			"keyword": "%! *EOL[_ ]*(MUDDLE|PLAN)\\h*:[^\n]*(\\n\\h*%!\\h*MULT.*)*",
+			"color": "text.tex.latex ", "flag": 0
+		},
+	],
+}
+```
+
+These regexp are more restrictive than the python parser's, this is on purpose as 
+these are fairly readable when written out.
+
+Eplanation:
+ 
+ + `%!(NI[_ ]*|EOL[_ ]*| *)` capture the `%!` directive with any of the NI or EOL modifiers.
+ + `(TODO|PLAN|MUDDLE)` capture the type of directive.
+ + `\\h*:` Capture any whitespaces and trailing colon (colon is required).
+ + `[^.!?\n]*[.!?]*` Capture until the end of the sentence.
+ + `(\\n\\h*%!\\h*MULT.*)*` Capture any following line with the multiline directive.
 
 ### Version ###
 
