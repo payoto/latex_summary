@@ -49,6 +49,7 @@ capture_sentence = r"([^\.!\?]*[\.!\?]*)"
 
 modifier_fullline = r"EOL[ _]*"
 modifier_noitem = r"NI[ _]*"
+modifier_doneitem = r"DONE[ _]*"
 capture_restofline = r"(.*)"
 
 input_str = '__INPUT__'
@@ -72,7 +73,15 @@ partial_specifiers = {
         'pattern_prefix': modifier_noitem,
         'typemodif': {"item": False},
     },
+    'item_done': {
+        'pattern_prefix': modifier_doneitem,
+        'typemodif': {"color": "Gray", "done": True},
+    },
 }
+
+# Global controlling the change of name imposed to the counter when using
+# "done"
+done_marker = "_done"
 
 
 def generate_capture_specifiers(default_specifier, partial_specifiers):
@@ -262,14 +271,24 @@ def close_itemlist(records, start_item, end_item, item_str):
 
 
 parser_summary_str = r"\item \textbf{{{0}s}}: {1} were detected."
-
+parser_summary_done_str = r"\item \textbf{{{0}s}}: {1}({2}) were detected"\
+    + " (completed)."
 
 def summarise_parser_activity(records, counters):
 
     records.append(r"\section{Parser results}")
     records.append(start_item)
     for count in counters:
-        records.append(parser_summary_str.format(count, counters[count]))
+        if ((done_marker not in count
+                and (count + done_marker) not in counters)
+                or (count[-len(done_marker):] == done_marker
+                    and count[:-len(done_marker)] not in counters)):
+            records.append(parser_summary_str.format(count, counters[count]))
+        elif (count + done_marker) in counters:
+            records.append(parser_summary_done_str.format(
+                count,
+                counters[count],
+                counters[count + done_marker]))
 
     records.append(end_item)
 
@@ -439,10 +458,13 @@ def process_record(records, line, line_info, prev_record, nums,):
     if record_isnot("multiline", record_type):
         prev_record = record_type
     if record_is("count", record_type):
+        add_to_count_name = ""
+        if record_is("done", record_type):
+            add_to_count_name = done_marker
         try:
-            nums[record_type["count"]] += 1
+            nums[record_type["count"] + add_to_count_name] += 1
         except Exception as e:
-            nums[record_type["count"]] = 1
+            nums[record_type["count"] + add_to_count_name] = 1
 
     return prev_record, nums
 

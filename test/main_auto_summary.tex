@@ -4,7 +4,7 @@
 \section{Parser results}
     \begin{itemize}[noitemsep]
 \item \textbf{sections}: 10 were detected.
-\item \textbf{todos}: 8 were detected.
+\item \textbf{todos}: 9(1) were detected (completed).
 \item \textbf{summarys}: 4 were detected.
 \item \textbf{repetitions}: 1 were detected.
 \item \textbf{plans}: 2 were detected.
@@ -27,6 +27,10 @@
         % test\test_latex_summary.tex:38
         \item {\color{red}This is a todo that should apppear in line here, but itemized in the todolist.} (section~\ref{autosec:5})
         % test\test_latex_summary.tex:44
+        \item {\color{Gray}This todo should be in Gray and appear as done.} (section~\ref{autosec:7})
+        % test\test_latex_summary.tex:68
+        \item {\color{red}This todo should be in red and appear and is not done.} (section~\ref{autosec:7})
+        % test\test_latex_summary.tex:69
         \item {\color{red}This should be red text for an item ``to-do''.} (section~\ref{autosec:8})
         % test\test_latex_summary2.tex:7
 {\color{red}This should match the previous sentence.}
@@ -120,8 +124,14 @@ This is plain text.
 \label{autosec:7}
 These can overlap if the sectionning is not done correctly.
         % test\test_latex_summary.tex:66
+    \begin{itemize}[noitemsep]
+        \item {\color{Gray}This todo should be in Gray and appear as done.}
+        % test\test_latex_summary.tex:68
+        \item {\color{red}This todo should be in red and appear and is not done.}
+        % test\test_latex_summary.tex:69
 % End file : test\test_latex_summary.tex
 % Start file : test\test_latex_summary2.tex
+    \end{itemize}
 \chapter{Test the multi-line functionality}
         % test\test_latex_summary2.tex:1
 \label{autosec:7}
