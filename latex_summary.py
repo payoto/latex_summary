@@ -274,16 +274,21 @@ parser_summary_str = r"\item \textbf{{{0}s}}: {1} were detected."
 parser_summary_done_str = r"\item \textbf{{{0}s}}: {1}({2}) were detected"\
     + " (completed)."
 
+
 def summarise_parser_activity(records, counters):
 
     records.append(r"\section{Parser results}")
     records.append(start_item)
     for count in counters:
         if ((done_marker not in count
-                and (count + done_marker) not in counters)
-                or (count[-len(done_marker):] == done_marker
-                    and count[:-len(done_marker)] not in counters)):
+                and (count + done_marker) not in counters)):
             records.append(parser_summary_str.format(count, counters[count]))
+        elif (count[-len(done_marker):] == done_marker
+                and count[:-len(done_marker)] not in counters):
+            records.append(parser_summary_done_str.format(
+                count[:-len(done_marker)],
+                0,
+                counters[count]))
         elif (count + done_marker) in counters:
             records.append(parser_summary_done_str.format(
                 count,
