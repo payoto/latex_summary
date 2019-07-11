@@ -7,6 +7,7 @@ a summary.
 import os
 import re
 import sys
+from collections import OrderedDict
 
 file_parse_triggers = [
     r"input",
@@ -85,9 +86,9 @@ done_marker = "_done"
 
 
 def generate_capture_specifiers(default_specifier, partial_specifiers):
-    capture_specifiers = {
-        'default': dict(default_specifier),
-    }
+    capture_specifiers = OrderedDict(
+        [('default', dict(default_specifier))],
+    )
 
     for new_spec in partial_specifiers:
         if input_str in partial_specifiers[new_spec]:
@@ -298,11 +299,14 @@ def summarise_parser_activity(records, counters):
     records.append(end_item)
 
 
-def parse_file(file_in,
-               records={'title': [], 'parser': [], 'todos': [], 'summary': []},
-               n_stacks=0,
-               counters={"section": 0},
-               ):
+def parse_file(
+    file_in,
+    records=OrderedDict(
+        [('title', []), ('parser', []), ('todos', []), ('summary', [])],
+    ),
+    n_stacks=0,
+    counters=OrderedDict([("section", 0)]),
+):
 
     records['summary'].append("% Start file : " + file_in)
     prev_record = {}
