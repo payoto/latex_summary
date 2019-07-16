@@ -1,0 +1,119 @@
+%!TEX root = main_auto_concatenate.tex
+%!TODO: Early todo, to test issue \#2.
+\documentclass[]{memoir}
+\usepackage{enumitem}
+\usepackage{import}
+
+\title{Test document}
+
+
+\begin{document}
+
+\maketitle
+
+
+\chapter{The first}
+
+\section{Sample section}
+
+%!TODO: Actually put text instead of lorem ipsum.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+%!SUMMARY: Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+
+\subsection{Sample subsection}
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+%!TODO: Actually put text instead of lorem ipsum.
+%!MULT: And also do other things.
+
+\subsection{lorem}
+
+%!REP: Lorem ipsum is repeated.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+%!SUMMARY: Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+%!EOL_TODO: Actually put text instead of lorem ipsum. And also do other things on the same line.
+%!EOLMULT: And continue again on the next line. (after the dot too).
+
+\section{ipsum}
+
+%!MULT: This is plain text.
+%!NI_PLAN: This is a plan that is not itemized.
+%!NI_TODO: This is a todo that should apppear in line here, but itemized in the todolist.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+%!SUMMARY: Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+%!MUDLE: This section is unclear.
+%!MULT: Tries to say something else.
+
+\paragraph{para 1}
+\paragraph{para 2}
+
+\subsection{para bug}
+
+\subsection{para bug}
+
+\paragraph{para 3}
+\paragraph{para 4}
+\paragraph{para 5}
+%!MULT: These can overlap if the sectionning is not done correctly.
+
+%!DONE_TODO: This todo should be in Gray and appear as done.
+%!TODO: This todo should be in red and appear and is not done.
+\chapter{Test the multi-line functionality}
+
+%!MULT: This should print raw text not in an item.
+
+%!SUMMARY: Black summary test.
+%!MULT: This should match the previous sentence.
+%!TODO: This should be red text for an item ``to-do''.
+%!MULT: This should match the previous sentence.
+%!MUDDLE: This should be ``OliveGreen'' text for a muddled paragraph.
+%!MULT: This should match the previous sentence.
+%!PLAN: This should appear in blue for a planned paragraph.
+%!MULT: This should match the previous sentence.
+
+\chapter{Test import}
+%!MULT: This doesn't work yet.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+%!TODO: Import a file.
+\chapter{Test import}
+%!MULT: This doesn't work yet.
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+%!TODO: Import a file.
+
+\end{document}
