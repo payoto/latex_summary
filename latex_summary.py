@@ -40,6 +40,7 @@ phrase_record_triggers = [
     r"MUD+[LED]*",
     r"PLAN",
     r"REP[EA]*[TION]*",
+    r"QUESTIONS*",
 ]
 
 re_comment = re.compile("\\s*%")
@@ -171,6 +172,9 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 4]["count"] = "plan"
     re_type[pat_offset + 5]["color"] = "DarkOrchid"
     re_type[pat_offset + 5]["count"] = "repetition"
+    re_type[pat_offset + 6]["color"] = "ForestGreen"
+    re_type[pat_offset + 6]["count"] = "question"
+    re_type[pat_offset + 6]["todo"] = True
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
@@ -311,7 +315,7 @@ def parse_file(
     records['summary'].append("% Start file : " + file_in)
     prev_record = {}
     if n_stacks == 0:
-        records['todos'].append(r"\section{List of To-dos}")
+        records['todos'].append(r"\section{List of To-dos and questions}")
         records['todos'].append(start_enum)
 
     with open(file_in, 'r') as f:
