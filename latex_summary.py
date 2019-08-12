@@ -84,6 +84,7 @@ partial_specifiers = {
 # Global controlling the change of name imposed to the counter when using
 # "done"
 done_marker = "_done"
+default_name_change = '_auto_summary'
 
 
 def generate_capture_specifiers(default_specifier, partial_specifiers):
@@ -184,6 +185,9 @@ def build_summary_parse_re(commands, patterns):
     re_type[cmd_offset + 3]["count"] = "section"  # \[sub]*section{}
     re_type[cmd_offset + 4] = {"title": False}  # \frontmatter
 
+    for d in re_type:
+        d["active"] = True
+
     re_strings.extend([command_name_to_re_string(c) for c in commands])
 
     for spec in capture_specifiers:
@@ -197,12 +201,14 @@ def build_summary_parse_re(commands, patterns):
                 for modif in modifiers:
                     re_type[-1][modif] = modifiers[modif]
 
-    return build_regex_list(re_strings), re_type
+    return build_regex_list(re_strings), re_type, \
+        {"cmd": cmd_offset, "pattern": pat_offset}
 
 
 file_parse_re = build_file_parse_re(file_parse_triggers)
-summary_parse_re, summary_parse_re_types = build_summary_parse_re(
-    line_record_triggers, phrase_record_triggers)
+summary_parse_re, summary_parse_re_types,\
+    summary_starts = build_summary_parse_re(
+        line_record_triggers, phrase_record_triggers)
 
 
 def parse_new_pattern(pattern, regex_type=default_pattern_type):
@@ -388,7 +394,7 @@ def detect_record(line):
         m = pat_re.search(line)
         if m:
             break
-    if m:
+    if m and ("active" not in pat_type or pat_type["active"]):
         record = m.group(1)
         record_type = pat_type
 
@@ -481,14 +487,13 @@ def process_record(records, line, line_info, prev_record, nums,):
 
     return prev_record, nums
 
-
-def write_records(records, file_name, name_change='_auto_summary'):
+def write_records(records, file_name, name_change=default_name_change):
 
     if not name_change:
-        name_change = '_auto_summary'
+        name_change = default_name_change
 
     file, ext = os.path.splitext(file_name)
-    new_file = file + "_auto_summary" + ext
+    new_file = file + name_change + ext
     with open(new_file, 'w') as f:
         for rec in records:
             f.writelines("%s\n" % l for l in records[rec])
@@ -497,5 +502,18 @@ def write_records(records, file_name, name_change='_auto_summary'):
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
+    name_change = default_name_change
+
+    if len(sys.argv) > 1:
+        if "-s" in sys.argv:
+            for i in range(
+                    summary_starts["pattern"],
+                    summary_starts["pattern"] + len(phrase_record_triggers) *
+                    len(capture_specifiers)):
+                if not summary_parse_re[i].match("%!SUMMARY"):
+                    summary_parse_re_types[i]["active"] = False
+            name_change = name_change + "only"
+
+
     records, counters = parse_file(file_name)
-    write_records(records, file_name)
+    write_records(records, file_name, name_change)
