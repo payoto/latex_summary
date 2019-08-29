@@ -41,6 +41,7 @@ phrase_record_triggers = [
     r"PLAN",
     r"REP[EA]*[TION]*",
     r"QUESTIONS*",
+    r"SUPERVISOR_*[TOM]*",
 ]
 
 re_comment = re.compile("\\s*%")
@@ -77,6 +78,12 @@ partial_specifiers = {
     },
     'item_done': {
         'pattern_prefix': modifier_doneitem,
+        'typemodif': {"color": "Gray", "done": True},
+    },
+    'full_line_done': {
+        'pattern_prefix': ("(?:" + modifier_fullline + modifier_doneitem + "|"
+                           + modifier_doneitem + modifier_fullline + ")"),
+        'capture': capture_restofline,
         'typemodif': {"color": "Gray", "done": True},
     },
 }
@@ -176,6 +183,8 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 6]["color"] = "ForestGreen"
     re_type[pat_offset + 6]["count"] = "question"
     re_type[pat_offset + 6]["todo"] = True
+    re_type[pat_offset + 7]["color"] = "WildStrawberry"
+    re_type[pat_offset + 7]["count"] = "supervisor(Tom)"
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
@@ -482,10 +491,11 @@ def process_record(records, line, line_info, prev_record, nums,):
             add_to_count_name = done_marker
         try:
             nums[record_type["count"] + add_to_count_name] += 1
-        except Exception as e:
+        except Exception:
             nums[record_type["count"] + add_to_count_name] = 1
 
     return prev_record, nums
+
 
 def write_records(records, file_name, name_change=default_name_change):
 
@@ -513,7 +523,6 @@ if __name__ == "__main__":
                 if not summary_parse_re[i].match("%!SUMMARY"):
                     summary_parse_re_types[i]["active"] = False
             name_change = name_change + "only"
-
 
     records, counters = parse_file(file_name)
     write_records(records, file_name, name_change)
