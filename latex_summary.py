@@ -186,8 +186,10 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 6]["todo"] = True
     re_type[pat_offset + 7]["color"] = "WildStrawberry"
     re_type[pat_offset + 7]["count"] = "supervisor(Tom)"
+    re_type[pat_offset + 7]["prefix"] = "Tom: "
     re_type[pat_offset + 8]["color"] = "Periwinkle"
     re_type[pat_offset + 8]["count"] = "bad reference"
+    re_type[pat_offset + 8]["prefix"] = "ref: "
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
@@ -450,6 +452,11 @@ def process_record(records, line, line_info, prev_record, nums,):
         close_itemlist(records['summary'],
                        start_item, end_item, item_str)
 
+    if record_is("prefix", record_type):
+        record = record_type["prefix"] + record
+    if record_is("suffix", record_type):
+        record = record + record_type["suffix"]
+
     is_color, color = records_are_value("color", prev_record, record_type)
     if is_color:
         record = color_format.format(color, record)
@@ -457,6 +464,7 @@ def process_record(records, line, line_info, prev_record, nums,):
     if record_is("item", record_type):
         open_itemlist(records['summary'], start_item, end_item, item_str)
         record = item_str + record
+
     if "title" in record_type:
         if record_type["title"]:
             record = re.sub(r"\\title\s*\{",
