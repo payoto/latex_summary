@@ -7,6 +7,7 @@
 \item \textbf{todos}: 9(1) were detected (completed).
 \item \textbf{questions}: 1 were detected.
 \item \textbf{summarys}: 4 were detected.
+\item \textbf{bad references}: 1 were detected.
 \item \textbf{repetitions}: 1 were detected.
 \item \textbf{plans}: 2 were detected.
 \item \textbf{muddles}: 2 were detected.
@@ -26,15 +27,15 @@
 {\color{red}And also do other things.}
         % test\test_latex_summary.tex:25
         \item {\color{red}Actually put text instead of lorem ipsum. And also do other things on the same line.} (section~\ref{autosec:4})
-        % test\test_latex_summary.tex:37
+        % test\test_latex_summary.tex:39
 {\color{red}And continue again on the next line. (after the dot too).}
-        % test\test_latex_summary.tex:38
+        % test\test_latex_summary.tex:40
         \item {\color{red}This is a todo that should apppear in line here, but itemized in the todolist.} (section~\ref{autosec:5})
-        % test\test_latex_summary.tex:44
+        % test\test_latex_summary.tex:46
         \item {\color{Gray}This todo should be in Gray and appear as done.} (section~\ref{autosec:7})
-        % test\test_latex_summary.tex:68
+        % test\test_latex_summary.tex:70
         \item {\color{red}This todo should be in red and appear and is not done.} (section~\ref{autosec:7})
-        % test\test_latex_summary.tex:69
+        % test\test_latex_summary.tex:71
         \item {\color{red}This should be red text for an item ``to-do''.} (section~\ref{autosec:8})
         % test\test_latex_summary2.tex:7
 {\color{red}This should match the previous sentence.}
@@ -80,62 +81,64 @@
         % test\test_latex_summary.tex:27
 \label{autosec:3}
     \begin{itemize}[noitemsep]
-        \item {\color{DarkOrchid}Lorem ipsum is repeated.}
+        \item {\color{Periwinkle}Missing ref.}
         % test\test_latex_summary.tex:29
+        \item {\color{DarkOrchid}Lorem ipsum is repeated.}
+        % test\test_latex_summary.tex:31
         \item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-        % test\test_latex_summary.tex:32
+        % test\test_latex_summary.tex:34
         \item {\color{red}Actually put text instead of lorem ipsum. And also do other things on the same line.}
-        % test\test_latex_summary.tex:37
+        % test\test_latex_summary.tex:39
 {\color{red}And continue again on the next line. (after the dot too).}
-        % test\test_latex_summary.tex:38
+        % test\test_latex_summary.tex:40
     \end{itemize}
 \section{ipsum}
-        % test\test_latex_summary.tex:40
+        % test\test_latex_summary.tex:42
 \label{autosec:4}
 This is plain text.
-        % test\test_latex_summary.tex:42
-{\color{blue}This is a plan that is not itemized.}
-        % test\test_latex_summary.tex:43
-{\color{red}This is a todo that should apppear in line here, but itemized in the todolist.}
         % test\test_latex_summary.tex:44
+{\color{blue}This is a plan that is not itemized.}
+        % test\test_latex_summary.tex:45
+{\color{red}This is a todo that should apppear in line here, but itemized in the todolist.}
+        % test\test_latex_summary.tex:46
     \begin{itemize}[noitemsep]
         \item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-        % test\test_latex_summary.tex:51
-        \item {\color{OliveGreen}This section is unclear.}
         % test\test_latex_summary.tex:53
+        \item {\color{OliveGreen}This section is unclear.}
+        % test\test_latex_summary.tex:55
 {\color{OliveGreen}Tries to say something else.}
-        % test\test_latex_summary.tex:54
+        % test\test_latex_summary.tex:56
     \end{itemize}
 \paragraph{para 1}
-        % test\test_latex_summary.tex:56
+        % test\test_latex_summary.tex:58
 \label{autosec:5}
 \paragraph{para 2}
-        % test\test_latex_summary.tex:57
+        % test\test_latex_summary.tex:59
 \label{autosec:5}
 \subsection{para bug}
-        % test\test_latex_summary.tex:59
+        % test\test_latex_summary.tex:61
 \label{autosec:5}
 \vspace{-36pt}\hspace{11pt}
 \subsection{para bug}
-        % test\test_latex_summary.tex:61
+        % test\test_latex_summary.tex:63
 \label{autosec:6}
 \vspace{-36pt}\hspace{11pt}
 \paragraph{para 3}
-        % test\test_latex_summary.tex:63
-\label{autosec:7}
-\paragraph{para 4}
-        % test\test_latex_summary.tex:64
-\label{autosec:7}
-\paragraph{para 5}
         % test\test_latex_summary.tex:65
 \label{autosec:7}
-These can overlap if the sectionning is not done correctly.
+\paragraph{para 4}
         % test\test_latex_summary.tex:66
+\label{autosec:7}
+\paragraph{para 5}
+        % test\test_latex_summary.tex:67
+\label{autosec:7}
+These can overlap if the sectionning is not done correctly.
+        % test\test_latex_summary.tex:68
     \begin{itemize}[noitemsep]
         \item {\color{Gray}This todo should be in Gray and appear as done.}
-        % test\test_latex_summary.tex:68
+        % test\test_latex_summary.tex:70
         \item {\color{red}This todo should be in red and appear and is not done.}
-        % test\test_latex_summary.tex:69
+        % test\test_latex_summary.tex:71
 % End file : test\test_latex_summary.tex
 % Start file : test\test_latex_summary2.tex
     \end{itemize}

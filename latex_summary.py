@@ -42,6 +42,7 @@ phrase_record_triggers = [
     r"REP[EA]*[TION]*",
     r"QUESTIONS*",
     r"SUPERVISOR_*[TOM]*",
+    r"BADREF[ERENCE]*",
 ]
 
 re_comment = re.compile("\\s*%")
@@ -185,6 +186,8 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 6]["todo"] = True
     re_type[pat_offset + 7]["color"] = "WildStrawberry"
     re_type[pat_offset + 7]["count"] = "supervisor(Tom)"
+    re_type[pat_offset + 8]["color"] = "Periwinkle"
+    re_type[pat_offset + 8]["count"] = "bad reference"
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
