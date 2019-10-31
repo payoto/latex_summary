@@ -480,8 +480,8 @@ def process_record(records, line, line_info, prev_record, nums,):
     if record_is("done", record_type):
         done_suffix = done_marker
         if record_is("count", record_type):
-            done_suffix += record_type["count"]
-        record = record + "[" + done_suffix + "]"
+            done_suffix += " " + record_type["count"]
+        record = record + " [" + done_suffix + "]"
 
     is_color, color = records_are_value("color", prev_record, record_type)
     if is_color:
