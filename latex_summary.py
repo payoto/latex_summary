@@ -90,8 +90,8 @@ partial_specifiers = {
 }
 
 # Global controlling the change of name imposed to the counter when using
-# "done"
-done_marker = "_done"
+# "done", is also printed in the legend is used in a string comparison
+done_marker = " (completed)"
 default_name_change = '_auto_summary'
 
 
@@ -171,25 +171,42 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 0]["todo"] = True
     re_type[pat_offset + 0]["color"] = "red"
     re_type[pat_offset + 0]["count"] = "todo"
+    re_type[pat_offset + 0]["legend"] = "An item that needs doing."
+
     re_type[pat_offset + 1]["count"] = "summary"
+    re_type[pat_offset + 1]["legend"] = "Summary of written a paragraph."
+
     re_type[pat_offset + 2]["multiline"] = True
     re_type[pat_offset + 2]["item"] = False
+
     re_type[pat_offset + 3]["muddle"] = True
     re_type[pat_offset + 3]["color"] = "OliveGreen"
     re_type[pat_offset + 3]["count"] = "muddle"
+    re_type[pat_offset + 3]["legend"] = "A paragraph where the point is" +\
+        " not clear."
+
     re_type[pat_offset + 4]["color"] = "blue"
     re_type[pat_offset + 4]["count"] = "plan"
+    re_type[pat_offset + 4]["legend"] = "planned paragraph or idea."
+
     re_type[pat_offset + 5]["color"] = "DarkOrchid"
     re_type[pat_offset + 5]["count"] = "repetition"
+    re_type[pat_offset + 5]["legend"] = "Paragraph is repeated."
+
     re_type[pat_offset + 6]["color"] = "ForestGreen"
     re_type[pat_offset + 6]["count"] = "question"
     re_type[pat_offset + 6]["todo"] = True
+    re_type[pat_offset + 6]["legend"] = "question to ask."
+
     re_type[pat_offset + 7]["color"] = "WildStrawberry"
     re_type[pat_offset + 7]["count"] = "supervisor(Tom)"
     re_type[pat_offset + 7]["prefix"] = "Tom: "
+    re_type[pat_offset + 7]["legend"] = "Comment from TOM."
+
     re_type[pat_offset + 8]["color"] = "Periwinkle"
     re_type[pat_offset + 8]["count"] = "bad reference"
     re_type[pat_offset + 8]["prefix"] = "ref: "
+    re_type[pat_offset + 8]["legend"] = "bad or missing reference."
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
@@ -326,7 +343,8 @@ def summarise_parser_activity(records, counters):
 def parse_file(
     file_in,
     records=OrderedDict(
-        [('title', []), ('parser', []), ('todos', []), ('summary', [])],
+        [('title', []), ('parser', []), ('legend', []),
+         ('todos', []), ('summary', [])],
     ),
     n_stacks=0,
     counters=OrderedDict([("section", 0)]),
@@ -337,6 +355,8 @@ def parse_file(
     if n_stacks == 0:
         records['todos'].append(r"\section{List of To-dos and questions}")
         records['todos'].append(start_enum)
+        records['legend'].append(r"\section{Key of colours and item types}")
+        records['legend'].append(start_enum)
 
     with open(file_in, 'r') as f:
         for line_num, lines in enumerate(f):
@@ -358,6 +378,7 @@ def parse_file(
     if n_stacks == 0:
         close_itemlist(records['summary'], start_item, end_item, item_str)
         close_itemlist(records['todos'], start_enum, end_enum, item_str)
+        close_itemlist(records['legend'], start_enum, end_enum, item_str)
         summarise_parser_activity(records['parser'], counters)
 
     records['summary'].append("% End file : " + file_in)
@@ -500,10 +521,17 @@ def process_record(records, line, line_info, prev_record, nums,):
         add_to_count_name = ""
         if record_is("done", record_type):
             add_to_count_name = done_marker
+        count_name = record_type["count"] + add_to_count_name
         try:
-            nums[record_type["count"] + add_to_count_name] += 1
-        except Exception:
-            nums[record_type["count"] + add_to_count_name] = 1
+            nums[count_name] += 1
+        except Exception:  # start a new count if increment fails
+            nums[count_name] = 1
+            if record_is("legend", record_type):  # add the count to the legend
+                legend_str = count_name + " : " + record_type["legend"]
+                if is_color:
+                    legend_str = color_format.format(color, legend_str)
+
+                records["legend"].append(item_str + legend_str)
 
     return prev_record, nums
 
