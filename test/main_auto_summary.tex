@@ -9,6 +9,7 @@
 \item \textbf{summarys}: 4 were detected.
 \item \textbf{bad references}: 1 were detected.
 \item \textbf{repetitions}: 1 were detected.
+\item \textbf{optional todos}: 1 were detected.
 \item \textbf{plans}: 2 were detected.
 \item \textbf{muddles}: 2 were detected.
 \item \textbf{supervisor(Tom)s}: 4(4) were detected (completed).
@@ -21,6 +22,7 @@
         \item summary : Summary of written a paragraph.
         \item {\color{Periwinkle}bad reference : bad or missing reference.}
         \item {\color{DarkOrchid}repetition : Paragraph is repeated.}
+        \item {\color{Orange}optional todo : An item that it would be nice to do.}
         \item {\color{blue}plan : planned paragraph or idea.}
         \item {\color{OliveGreen}muddle : A paragraph where the point is not clear.}
         \item {\color{Gray}todo (completed) : An item that needs doing.}
@@ -44,12 +46,14 @@
         % test\test_latex_summary.tex:39
 {\color{red}And continue again on the next line. (after the dot too).}
         % test\test_latex_summary.tex:40
+        \item {\color{Orange}This would be nice. (optional)} (section~\ref{autosec:4})
+        % test\test_latex_summary.tex:41
         \item {\color{red}This is a todo that should apppear in line here, but itemized in the todolist.} (section~\ref{autosec:5})
-        % test\test_latex_summary.tex:46
-        \item {\color{Gray}This todo should be in Gray and appear as done.[ (completed)todo]} (section~\ref{autosec:7})
-        % test\test_latex_summary.tex:70
-        \item {\color{red}This todo should be in red and appear and is not done.} (section~\ref{autosec:7})
+        % test\test_latex_summary.tex:47
+        \item {\color{Gray}This todo should be in Gray and appear as done. [ (completed) todo]} (section~\ref{autosec:7})
         % test\test_latex_summary.tex:71
+        \item {\color{red}This todo should be in red and appear and is not done.} (section~\ref{autosec:7})
+        % test\test_latex_summary.tex:72
         \item {\color{red}This should be red text for an item ``to-do''.} (section~\ref{autosec:8})
         % test\test_latex_summary2.tex:7
 {\color{red}This should match the previous sentence.}
@@ -105,54 +109,56 @@
         % test\test_latex_summary.tex:39
 {\color{red}And continue again on the next line. (after the dot too).}
         % test\test_latex_summary.tex:40
+        \item {\color{Orange}This would be nice. (optional)}
+        % test\test_latex_summary.tex:41
     \end{itemize}
 \section{ipsum}
-        % test\test_latex_summary.tex:42
+        % test\test_latex_summary.tex:43
 \label{autosec:4}
 This is plain text.
-        % test\test_latex_summary.tex:44
-{\color{blue}This is a plan that is not itemized.}
         % test\test_latex_summary.tex:45
-{\color{red}This is a todo that should apppear in line here, but itemized in the todolist.}
+{\color{blue}This is a plan that is not itemized.}
         % test\test_latex_summary.tex:46
+{\color{red}This is a todo that should apppear in line here, but itemized in the todolist.}
+        % test\test_latex_summary.tex:47
     \begin{itemize}[noitemsep]
         \item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-        % test\test_latex_summary.tex:53
+        % test\test_latex_summary.tex:54
         \item {\color{OliveGreen}This section is unclear.}
-        % test\test_latex_summary.tex:55
-{\color{OliveGreen}Tries to say something else.}
         % test\test_latex_summary.tex:56
+{\color{OliveGreen}Tries to say something else.}
+        % test\test_latex_summary.tex:57
     \end{itemize}
 \paragraph{para 1}
-        % test\test_latex_summary.tex:58
-\label{autosec:5}
-\paragraph{para 2}
         % test\test_latex_summary.tex:59
 \label{autosec:5}
+\paragraph{para 2}
+        % test\test_latex_summary.tex:60
+\label{autosec:5}
 \subsection{para bug}
-        % test\test_latex_summary.tex:61
+        % test\test_latex_summary.tex:62
 \label{autosec:5}
 \vspace{-36pt}\hspace{11pt}
 \subsection{para bug}
-        % test\test_latex_summary.tex:63
+        % test\test_latex_summary.tex:64
 \label{autosec:6}
 \vspace{-36pt}\hspace{11pt}
 \paragraph{para 3}
-        % test\test_latex_summary.tex:65
-\label{autosec:7}
-\paragraph{para 4}
         % test\test_latex_summary.tex:66
 \label{autosec:7}
-\paragraph{para 5}
+\paragraph{para 4}
         % test\test_latex_summary.tex:67
 \label{autosec:7}
-These can overlap if the sectionning is not done correctly.
+\paragraph{para 5}
         % test\test_latex_summary.tex:68
+\label{autosec:7}
+These can overlap if the sectionning is not done correctly.
+        % test\test_latex_summary.tex:69
     \begin{itemize}[noitemsep]
-        \item {\color{Gray}This todo should be in Gray and appear as done.[ (completed)todo]}
-        % test\test_latex_summary.tex:70
-        \item {\color{red}This todo should be in red and appear and is not done.}
+        \item {\color{Gray}This todo should be in Gray and appear as done. [ (completed) todo]}
         % test\test_latex_summary.tex:71
+        \item {\color{red}This todo should be in red and appear and is not done.}
+        % test\test_latex_summary.tex:72
 % End file : test\test_latex_summary.tex
 % Start file : test\test_latex_summary2.tex
     \end{itemize}
@@ -193,9 +199,9 @@ This doesn't work yet.
         % test\import_test/file_import.tex:12
         \item {\color{WildStrawberry}Tom: Comment from supervisor. with many dots.}
         % test\import_test/file_import.tex:13
-        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (eol then done)[ (completed)supervisor(Tom)]}
+        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (eol then done) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:14
-        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol)[ (completed)supervisor(Tom)]}
+        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:15
 % End file : test\import_test/file_import.tex
 % Start file : test\import_test/file_import.tex
@@ -212,9 +218,9 @@ This doesn't work yet.
         % test\import_test/file_import.tex:12
         \item {\color{WildStrawberry}Tom: Comment from supervisor. with many dots.}
         % test\import_test/file_import.tex:13
-        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (eol then done)[ (completed)supervisor(Tom)]}
+        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (eol then done) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:14
-        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol)[ (completed)supervisor(Tom)]}
+        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:15
 % End file : test\import_test/file_import.tex
     \end{itemize}
