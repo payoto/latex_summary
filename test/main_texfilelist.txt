@@ -1,0 +1,6 @@
+test\main.tex
+test\test_latex_summary.tex
+test\test_latex_summary2.tex
+test\import_test/file_import.tex
+test\import_test/file_import.tex
+

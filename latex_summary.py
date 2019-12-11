@@ -351,10 +351,12 @@ def parse_file(
     file_in,
     records=OrderedDict(
         [('title', []), ('parser', []), ('legend', []),
-         ('todos', []), ('summary', [])],
+         ('todos', []), ('summary', []), ('files', [])],
     ),
     n_stacks=0,
     counters=OrderedDict([("section", 0)]),
+    do_process_record=True,
+    generate_file_list=False,
 ):
 
     records['summary'].append("% Start file : " + file_in)
@@ -364,23 +366,29 @@ def parse_file(
         records['todos'].append(start_enum)
         records['legend'].append(r"\section{Key of colours and item types}")
         records['legend'].append(start_enum)
-
+    if generate_file_list:
+        records['files'].append(file_in)
     with open(file_in, 'r') as f:
         for line_num, lines in enumerate(f):
             line = lines.splitlines()[0]
             line_info = "        % " + file_in + ":" + str(line_num + 1)
 
-            prev_record, counters = process_record(records,
-                                                   line,
-                                                   line_info,
-                                                   prev_record,
-                                                   counters)
+            if do_process_record:
+                prev_record, counters = process_record(
+                    records,
+                    line,
+                    line_info,
+                    prev_record,
+                    counters,
+                )
 
             next_file = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
-                _, counters = parse_file(next_file, records, n_stacks + 1,
-                                         counters)
+                _, counters = parse_file(
+                    next_file, records, n_stacks + 1, counters,
+                    do_process_record, generate_file_list,
+                )
 
     if n_stacks == 0:
         close_itemlist(records['summary'], start_item, end_item, item_str)
@@ -548,32 +556,45 @@ def process_record(records, line, line_info, prev_record, nums,):
     return prev_record, nums
 
 
-def write_records(records, file_name, name_change=default_name_change):
+def write_records(
+        records, file_name, name_change=default_name_change, new_ext=None,
+        records_to_print=None,):
 
     if not name_change:
         name_change = default_name_change
 
     file, ext = os.path.splitext(file_name)
-    new_file = file + name_change + ext
+    if new_ext is None:
+        new_ext = ext
+    new_file = file + name_change + new_ext
     with open(new_file, 'w') as f:
-        for rec in records:
+        if records_to_print is None:
+            records_to_print = records
+        for rec in records_to_print:
             f.writelines("%s\n" % l for l in records[rec])
             f.write("\n")
 
 
 if __name__ == "__main__":
     file_name = sys.argv[1]
-    name_change = default_name_change
 
+    parser_args = dict()
+    record_writer_args = dict()
     if len(sys.argv) > 1:
-        if "-s" in sys.argv:
+        if "-s" in sys.argv:  # parse only summaries
             for i in range(
                     summary_starts["pattern"],
                     summary_starts["pattern"] + len(phrase_record_triggers) *
                     len(capture_specifiers)):
                 if not summary_parse_re[i].match("%!SUMMARY"):
                     summary_parse_re_types[i]["active"] = False
-            name_change = name_change + "only"
+            record_writer_args['name_change'] = default_name_change + "only"
+        if "-f" in sys.argv:  # parse only file list
+            parser_args['do_process_record'] = False
+            parser_args['generate_file_list'] = True
+            record_writer_args['name_change'] = "_texfilelist"
+            record_writer_args['new_ext'] = '.txt'
+            record_writer_args['records_to_print'] = ['files']
 
-    records, counters = parse_file(file_name)
-    write_records(records, file_name, name_change)
+    records, counters = parse_file(file_name, **parser_args)
+    write_records(records, file_name, **record_writer_args)
