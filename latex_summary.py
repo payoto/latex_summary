@@ -44,6 +44,7 @@ phrase_record_triggers = [
     r"SUPERVISOR_*[TOM]*",
     r"BADREF[ERENCE]*",
     r"OPT[IONAL]*_*TO+DO+",
+    r"IDEA",
 ]
 
 re_comment = re.compile("\\s*%")
@@ -214,6 +215,12 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 9]["count"] = "optional todo"
     re_type[pat_offset + 9]["legend"] = "An item that it would be nice to do."
     re_type[pat_offset + 9]["suffix"] = " (optional todo)"
+
+    re_type[pat_offset + 10] = dict(re_type[pat_offset + 0])  # = todo
+    re_type[pat_offset + 10]["color"] = "teal"
+    re_type[pat_offset + 10]["count"] = "idea"
+    re_type[pat_offset + 10]["legend"] = "An idea that should be explored."
+    re_type[pat_offset + 10]["prefix"] = " Idea: "
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
