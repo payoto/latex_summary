@@ -16,6 +16,9 @@ file_parse_triggers = [
     r"subfile",
 ]
 
+file_parsing_modifiers = {trigger: None for trigger in file_parse_triggers}
+
+
 line_record_triggers = [
     r"title",
     r"maketitle",
@@ -154,8 +157,17 @@ def build_regex_list(patterns):
 def build_file_parse_re(commands):
 
     patterns = [r"^[^%]*\\" + c + file_capture for c in commands]
+    temp_file_parse_re = []
 
-    return build_regex_list(patterns)
+    for command, regexp in zip(commands, build_regex_list(patterns)):
+        temp_file_parse_re.append({
+            "pattern": command,
+            "regexp": regexp,
+        })
+
+
+
+    return temp_file_parse_re
 
 
 def build_summary_parse_re(commands, patterns):
@@ -364,6 +376,7 @@ def parse_file(
     counters=OrderedDict([("section", 0)]),
     do_process_record=True,
     generate_file_list=False,
+    file_triggers=None,
 ):
 
     records['summary'].append("% Start file : " + file_in)
@@ -389,12 +402,12 @@ def parse_file(
                     counters,
                 )
 
-            next_file = detect_file(line, file_in)
+            next_file, next_file_triggers = detect_file(line, file_in)
             if next_file:
                 print("Next file : " + next_file)
                 _, counters = parse_file(
                     next_file, records, n_stacks + 1, counters,
-                    do_process_record, generate_file_list,
+                    do_process_record, generate_file_list, next_file_triggers
                 )
 
     if n_stacks == 0:
@@ -409,10 +422,12 @@ def parse_file(
 
 def detect_file(line, current_file):
     next_file = None
+    next_file_triggers = None
 
     for index_re, file_re in enumerate(file_parse_re):
-        m = file_re.search(line)
+        m = file_re["regexp"].search(line)
         if m:
+            next_file_triggers = file_parsing_modifiers[file_re["pattern"]]
             break
     if m:
         next_file = ""
@@ -441,7 +456,7 @@ def detect_file(line, current_file):
 
             pass
 
-    return next_file
+    return next_file, next_file_triggers
 
 
 def detect_record(line):
