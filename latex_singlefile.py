@@ -5,6 +5,52 @@ import re
 
 keep_text = r"(.*)"
 
+# record format [trigger, starting state]
+lxs.file_parsing_modifiers["subfile"] = {
+    "start_recording": {
+        "type": "record", "action": [r"\begin{document}", False],
+    },
+    "stop_recording": {
+        "type": "record", "action": [r"\end{document}", True],
+    }
+}
+
+
+def is_recording(file_triggers, encountered_state=None):
+
+    record_line = True
+    if file_triggers is None:
+        return record_line, encountered_state
+
+    # if this is the first time, set the state to the initial state
+    if encountered_state is None:
+        encountered_state = {}
+        for modif in file_triggers:
+            if file_triggers[modif]["type"] == "record":
+                encountered_state[modif] = False
+
+
+    for modif in encountered_state:
+        modifier_effect = (
+            file_triggers[modif]["action"][1] ^ encountered_state[modif]
+        )
+        record_line &= modifier_effect
+
+    return record_line, encountered_state
+
+def is_encountered(line, file_triggers, encountered_state):
+
+    tripped = False
+    if file_triggers is None:
+        return encountered_state, tripped
+
+    for modif in encountered_state:
+        check = file_triggers[modif]["action"][0] in line
+        encountered_state[modif] = encountered_state[modif] or check
+        tripped = tripped or check
+
+
+    return encountered_state, tripped
 
 def concatenate_file(
     file_in,
@@ -14,7 +60,8 @@ def concatenate_file(
     file_triggers=None,
 ):
     keep_re = re.compile(regex_keep)
-    record_line = True
+    record_line, encountered_state = is_recording(file_triggers)
+
     if n_stacks == 0:
         pass
     if file_out is None:
@@ -36,8 +83,15 @@ def concatenate_file(
                     file_triggers=next_file_triggers,
                 )
             else:
+                record_line, encountered_state = is_recording(
+                    file_triggers,
+                    encountered_state=encountered_state,
+                )
+                encountered_state, tripped = is_encountered(
+                    line, file_triggers, encountered_state)
+
                 m = keep_re.search(line)
-                if m and record_line:
+                if m and record_line and not tripped:
                     file_out.write(m.group(0) + "\n")
 
     if n_stacks == 0:
