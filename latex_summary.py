@@ -369,7 +369,7 @@ class ParsingProperties(object):
     def _match_re_and_type(self, new_re_patterns, new_re_types, default_type):
         """Checks that patterns and types are compatible"""
         if new_re_types is None:
-            re_type = [dict(re_type_default) for _ in new_re_patterns]
+            re_type = [dict(default_type) for _ in new_re_patterns]
         else:
             re_type = []
             if len(new_re_patterns) != len(new_re_types):
@@ -379,33 +379,34 @@ class ParsingProperties(object):
             else:
                 for new_type in new_re_types:
                     if new_type is None:
-                        re_type.append(dict(re_type_default))
+                        re_type.append(dict(default_type))
                     else:
                         re_type.append(new_type)
+        for d in re_type:
+            d["active"] = True
+            for df in default_type:
+                d[df] = default_type[df]
         return re_type
 
 
-module_parsing_properties = ParsingProperties()
-
-# for compatibility, most of the module expects module level variables
-file_parse_re = module_parsing_properties.file_parse_re
-summary_parse_re = module_parsing_properties.summary_parse_re
-summary_parse_re_types = module_parsing_properties.summary_parse_re_types
-summary_starts = module_parsing_properties.summary_starts
+module_parseprops = ParsingProperties()
 
 
 def parse_new_pattern(pattern, regex_type=default_pattern_type):
-    summary_parse_re.append(re.compile(pattern_name_to_re_string(pattern)))
-    summary_parse_re_types.append(dict(regex_type))
+    module_parseprops.summary_parse_re.append(
+        re.compile(pattern_name_to_re_string(pattern)))
+    module_parseprops.summary_parse_re_types.append(dict(regex_type))
 
 
 def parse_new_command(command, regex_type=default_command_type):
-    summary_parse_re.append(re.compile(command_name_to_re_string(command)))
-    summary_parse_re_types.append(dict(regex_type))
+    module_parseprops.summary_parse_re.append(
+        re.compile(command_name_to_re_string(command)))
+    module_parseprops.summary_parse_re_types.append(dict(regex_type))
 
 
 def parse_new_file(new_file_triggers):
-    file_parse_re.extend(build_file_parse_re(new_file_triggers))
+    module_parseprops.file_parse_re.extend(
+        build_file_parse_re(new_file_triggers))
 
 
 def open_itemlist(records, start_item, end_item, item_str):
@@ -554,7 +555,7 @@ def detect_file(line, current_file):
     next_file = None
     next_file_triggers = None
 
-    for index_re, file_re in enumerate(file_parse_re):
+    for index_re, file_re in enumerate(module_parseprops.file_parse_re):
         m = file_re["regexp"].search(line)
         if m:
             next_file_triggers = file_parsing_modifiers[file_re["pattern"]]
@@ -592,7 +593,9 @@ def detect_file(line, current_file):
 def detect_record(line):
     record_type = {}
     record = line
-    for pat_re, pat_type in zip(summary_parse_re, summary_parse_re_types):
+    for pat_re, pat_type in zip(
+            module_parseprops.summary_parse_re,
+            module_parseprops.summary_parse_re_types):
         m = pat_re.search(line)
         if m:
             break
@@ -648,7 +651,7 @@ def record_to_modifier_pattern(record):
 
 def process_modifier(record_type, record):
     modifier_call = getattr(
-        module_parsing_properties,
+        module_parseprops,
         "add_" + record_type["modifier"])
     new_partial_re, new_re_type = record_to_modifier_pattern(record)
     print(new_partial_re)
@@ -656,10 +659,6 @@ def process_modifier(record_type, record):
     print(modifier_call)
     modifier_call([new_partial_re], [new_re_type])
     print("done.")
-    file_parse_re = module_parsing_properties.file_parse_re
-    summary_parse_re = module_parsing_properties.summary_parse_re
-    summary_parse_re_types = module_parsing_properties.summary_parse_re_types
-    summary_starts = module_parsing_properties.summary_starts
 
 
 def process_record(records, line, line_info, prev_record, nums,):
@@ -764,6 +763,7 @@ def write_records(
             f.writelines("%s\n" % l for l in records[rec])
             f.write("\n")
 
+
 def main():
 
     file_name = sys.argv[1]
@@ -773,11 +773,13 @@ def main():
     if len(sys.argv) > 1:
         if "-s" in sys.argv:  # parse only summaries
             for i in range(
-                    summary_starts["pattern"],
-                    summary_starts["pattern"] + len(phrase_record_triggers) *
-                    len(capture_specifiers)):
-                if not summary_parse_re[i].match("%!SUMMARY"):
-                    summary_parse_re_types[i]["active"] = False
+                    module_parseprops.summary_starts["pattern"],
+                    module_parseprops.summary_starts["pattern"]
+                    + len(phrase_record_triggers) * len(capture_specifiers)):
+                if not module_parseprops.summary_parse_re[i].match(
+                        "%!SUMMARY"):
+                    module_parseprops.summary_parse_re_types[i]["active"] =\
+                        False
             record_writer_args['name_change'] = default_name_change + "only"
         if "-f" in sys.argv:  # parse only file list
             parser_args['do_process_record'] = False

@@ -13,6 +13,7 @@
 \item \textbf{plans}: 2 were detected.
 \item \textbf{muddles}: 2 were detected.
 \item \textbf{supervisor(Tom)s}: 6(6) were detected (completed).
+\item \textbf{farts}: 2(2) were detected (completed).
     \end{itemize}
 
 \section{Key of colours and item types}
@@ -247,9 +248,27 @@ This doesn't work yet.
         % test\import_test/file_subfile.tex:22
 % End file : test\import_test/file_subfile.tex
 % Start file : test\custom_input.tex
+    \end{itemize}
+\customseccommand{This section is added via a custom line capture section} 
+        % test\custom_input.tex:1
+\label{autosec:11}
+    \begin{itemize}[noitemsep]
+        \item {\color{brown}This fart is a custom trigger, it should be brown.}
+        % test\custom_input.tex:3
+        \item {\color{Gray}This fart is a custom trigger, it was brown, now it should be gray. [ (completed) fart]}
+        % test\custom_input.tex:4
         \item {\color{red}this todo in in a custom input file.}
         % test\custom_input.tex:5
 % End file : test\custom_input.tex
+    \end{itemize}
+\customseccommand{This section is added via a custom line capture section in the main } 
+        % test\main.tex:29
+\label{autosec:11}
+    \begin{itemize}[noitemsep]
+        \item {\color{brown}This fart is a custom trigger in the main file, it should be brown.}
+        % test\main.tex:31
+        \item {\color{Gray}This fart is a custom trigger in the main file, it was brown, now it should be gray. [ (completed) fart]}
+        % test\main.tex:32
     \end{itemize}
 % End file : test\main.tex
 
