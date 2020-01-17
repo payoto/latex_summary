@@ -121,7 +121,7 @@ capture_specifiers = generate_capture_specifiers(
 
 
 def command_name_to_re_string(command):
-    return r"^[^%]*(\\" + command + ".*)"
+    return r"^[\b]*(\\" + command + ".*)"
 
 
 def pattern_name_to_re_string(pattern,
@@ -156,7 +156,7 @@ def build_regex_list(patterns):
 
 def build_file_parse_re(commands):
 
-    patterns = [r"^[^%]*\\" + c + file_capture for c in commands]
+    patterns = [r"^[\b]*\\" + c + file_capture for c in commands]
     temp_file_parse_re = []
 
     for command, regexp in zip(commands, build_regex_list(patterns)):
@@ -164,8 +164,6 @@ def build_file_parse_re(commands):
             "pattern": command,
             "regexp": regexp,
         })
-
-
 
     return temp_file_parse_re
 
@@ -596,8 +594,8 @@ def write_records(
             f.writelines("%s\n" % l for l in records[rec])
             f.write("\n")
 
+def main():
 
-if __name__ == "__main__":
     file_name = sys.argv[1]
 
     parser_args = dict()
@@ -620,3 +618,12 @@ if __name__ == "__main__":
 
     records, counters = parse_file(file_name, **parser_args)
     write_records(records, file_name, **record_writer_args)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        import pdb
+        import traceback
+        traceback.print_exc()
+        pdb.post_mortem()

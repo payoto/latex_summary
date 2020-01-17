@@ -1,21 +1,34 @@
 %!TEX root = main.tex
 %!TODO: Early todo, to test issue \#2.
+%!CUSTOM_TRIGGER_LINE: customseccommand; None
+%!EOL_CUSTOM_TRIGGER_PHRASE: FARTS; {'color':'brown', 'count':'fart', 'description': 'A really shit statement'}
+%!CUSTOM_TRIGGER_FILE: customlatexfileread
 \documentclass[]{memoir}
 \usepackage{enumitem}
 \usepackage{import}
+\usepackage{subfiles}
 
 \title{Test document}
 
+\newcommand\customlatexfileread[1]{\input{#1}}
+\newcommand\customseccommand[1]{\section{#1}}
 
 \begin{document}
 
 \maketitle
 
 \input{test_latex_summary}
-\input{test_latex_summary2 }
+\input{test_latex_summary2}
 
 \import{import_test/}{file_import}
 \import{import_test/}{file_import.tex}
 \subfile{import_test/file_subfile}
+
+\customlatexfileread{custom_input}
+
+\customseccommand{This section is added via a custom line capture section in the main } 
+
+%!FART: This fart is a custom trigger in the main file, it should be brown.
+%!DONE_FART: This fart is a custom trigger in the main file, it was brown, now it should be gray.
 
 \end{document}

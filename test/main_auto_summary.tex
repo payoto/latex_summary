@@ -3,8 +3,8 @@
 
 \section{Parser results}
     \begin{itemize}[noitemsep]
-\item \textbf{sections}: 10 were detected.
-\item \textbf{todos}: 9(1) were detected (completed).
+\item \textbf{sections}: 11 were detected.
+\item \textbf{todos}: 10(1) were detected (completed).
 \item \textbf{questions}: 1 were detected.
 \item \textbf{summarys}: 4 were detected.
 \item \textbf{bad references}: 1 were detected.
@@ -12,7 +12,7 @@
 \item \textbf{optional todos}: 1 were detected.
 \item \textbf{plans}: 2 were detected.
 \item \textbf{muddles}: 2 were detected.
-\item \textbf{supervisor(Tom)s}: 4(4) were detected (completed).
+\item \textbf{supervisor(Tom)s}: 6(6) were detected (completed).
     \end{itemize}
 
 \section{Key of colours and item types}
@@ -62,6 +62,8 @@
         % test\import_test/file_import.tex:11
         \item {\color{red}Import a file.} (section~\ref{autosec:10})
         % test\import_test/file_import.tex:11
+        \item {\color{red}Import a file.} (section~\ref{autosec:11})
+        % test\import_test/file_subfile.tex:18
     \end{enumerate}
 
 % Start file : test\main.tex
@@ -223,6 +225,27 @@ This doesn't work yet.
         \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:15
 % End file : test\import_test/file_import.tex
+% Start file : test\import_test/file_subfile.tex
+    \end{itemize}
+\chapter{Test subfile}
+        % test\import_test/file_subfile.tex:8
+\label{autosec:10}
+This doesn't work yet.
+        % test\import_test/file_subfile.tex:9
+    \begin{itemize}[noitemsep]
+        \item {\color{red}Import a file.}
+        % test\import_test/file_subfile.tex:18
+        \item {\color{WildStrawberry}Tom: Comment from supervisor.}
+        % test\import_test/file_subfile.tex:19
+        \item {\color{WildStrawberry}Tom: Comment from supervisor. with many dots.}
+        % test\import_test/file_subfile.tex:20
+        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (eol then done) [ (completed) supervisor(Tom)]}
+        % test\import_test/file_subfile.tex:21
+        \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol) [ (completed) supervisor(Tom)]}
+        % test\import_test/file_subfile.tex:22
+% End file : test\import_test/file_subfile.tex
+% Start file : test\custom_input.tex
+% End file : test\custom_input.tex
     \end{itemize}
 % End file : test\main.tex
 
