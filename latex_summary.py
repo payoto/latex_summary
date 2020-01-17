@@ -245,6 +245,40 @@ def build_summary_parse_re(commands, patterns):
 
     re_strings.extend([command_name_to_re_string(c) for c in commands])
 
+    re_strings, re_type = apply_capture_specifiers(
+        patterns, re_type, pat_range,
+        re_strings, capture_specifiers)
+
+    return build_regex_list(re_strings), re_type, \
+        {"cmd": cmd_offset, "pattern": pat_offset}
+
+
+def apply_capture_specifiers(patterns, re_type, pat_range,
+                             re_strings=[],
+                             capture_specifiers=capture_specifiers):
+    """Applies multiple capture specifiers to a set of capture patterns
+
+    Args:
+        patterns (string|list): a list of pattern strings which are recognised
+         (e.g.: SUMMARY, PLAN, TODO, etc...)
+        re_type (dict|list): Dictionaries which customise the behaviour of the
+         tool for each patter (recommended keys:
+             - 'color': <valid latex color string>;
+             - 'count': <A name for the item type>;
+             - 'description': <A legend for the type of item>.)
+        pat_range (range()): The range of items of re_type which correspond to
+         `patterns`
+        re_strings (list, optional): list of re_strings preceding the ones
+         which will be added.
+        capture_specifiers (dictionaries, optional): See the definition of the
+         module level variable `capture_specifiers`.
+
+    Returns:
+        (string|list, dict|list): The strings which will be used for regexp and
+        a full list of dictionary descriptors for each re_string. There will be
+        one item in each list for each combination of
+        PATTERNS x CAPTURE_SPECIFIERS
+    """
     for spec in capture_specifiers:
         re_strings.extend([
             pattern_name_to_re_string(p, capture_specifiers[spec])
@@ -255,6 +289,7 @@ def build_summary_parse_re(commands, patterns):
                 re_type.append(dict(re_type[i]))
                 for modif in modifiers:
                     re_type[-1][modif] = modifiers[modif]
+    return re_strings, re_type
 
     return build_regex_list(re_strings), re_type, \
         {"cmd": cmd_offset, "pattern": pat_offset}
@@ -274,6 +309,10 @@ def parse_new_pattern(pattern, regex_type=default_pattern_type):
 def parse_new_command(command, regex_type=default_command_type):
     summary_parse_re.append(re.compile(command_name_to_re_string(command)))
     summary_parse_re_types.append(dict(regex_type))
+
+
+def parse_new_file(new_file_triggers):
+    file_parse_re.extend(build_file_parse_re(new_file_triggers))
 
 
 def open_itemlist(records, start_item, end_item, item_str):
@@ -618,6 +657,7 @@ def main():
 
     records, counters = parse_file(file_name, **parser_args)
     write_records(records, file_name, **record_writer_args)
+
 
 if __name__ == "__main__":
     try:
