@@ -291,14 +291,98 @@ def apply_capture_specifiers(patterns, re_type, pat_range,
                     re_type[-1][modif] = modifiers[modif]
     return re_strings, re_type
 
-    return build_regex_list(re_strings), re_type, \
-        {"cmd": cmd_offset, "pattern": pat_offset}
+
+class ParsingProperties(object):
+    """
+    Class handling the regular expressions used for parsing the file
+
+    There are 3 main types of expression to capture 3 types of triggers:
+        - File triggers: Indicates a latex file input command the text captured
+         must correspond to a valid file path;
+        - Line triggers: The entire line will be copied into the summary file,
+         used to mirror the document structure for sections, and titles (for
+         example);
+        - Sentence triggers: Captures specially formatted comments used to
+         build the summary file (e.g. SUMMARY, PLAN, TODO, etc..)
+
+    During object instantiation the `__init__()` uses module level defaults,
+    customisation is then possible in code via the `add_...` methods and in
+    latex via the special sentence triggers:
+        - `%! CUSTOM_TRIGGER_LINE: <your custom trigger>`
+        - `%! CUSTOM_TRIGGER_PHRASE: <your custom trigger>`
+        - `%! CUSTOM_TRIGGER_FILE: <your custom trigger>`
+
+    """
+    def __init__(self,):
+        super(ParsingProperties, self).__init__()
+        self.file_parse_re = build_file_parse_re(file_parse_triggers)
+
+        self.summary_parse_re, self.summary_parse_re_types,\
+            self.summary_starts = build_summary_parse_re(
+                line_record_triggers, phrase_record_triggers)
+        self.file_parsing_modifiers = file_parsing_modifiers
+
+    def add_line_record_triggers(self, new_commands, new_re_types=None):
+        re_type = self._match_re_and_type(
+            new_commands, new_re_types, default_command_type)
+
+        re_strings = [command_name_to_re_string(c) for c in new_commands]
+        # Lines get prepended to the list as they are at the start
+        self.summary_parse_re = (
+            build_regex_list(re_strings)
+            + self.summary_parse_re)
+        self.summary_parse_re_types = (
+            re_type + self.summary_parse_re_types)
+        self.summary_starts["pattern"] += len(new_commands)
+
+    def add_phrase_record_triggers(self, new_patterns, new_re_types=None):
+
+        re_type = self._match_re_and_type(
+            new_patterns, new_re_types, default_pattern_type)
+
+        re_strings = []
+        pat_range = range(0, 0 + len(new_patterns))
+        re_strings, re_type = apply_capture_specifiers(
+            new_patterns, re_type, pat_range,
+            re_strings, capture_specifiers)
+
+        # phrases get appended as that enables to add as many as possible
+        self.summary_parse_re.extend(build_regex_list(re_strings))
+        self.summary_parse_re_types.extend(re_type)
+
+    def add_file_parse_triggers(self,
+                                new_file_triggers, new_trigger_modifs):
+        self.file_parse_re.extend(build_file_parse_re(new_file_triggers))
+        for i, new_trigger in enumerate(new_file_triggers):
+            self.file_parsing_modifiers[new_trigger] =\
+                new_trigger_modifs[i]
+
+    def _match_re_and_type(self, new_re_patterns, new_re_types, default_type):
+        """Checks that patterns and types are compatible"""
+        if new_re_types is None:
+            re_type = [dict(re_type_default) for _ in new_re_patterns]
+        else:
+            re_type = []
+            if len(new_re_patterns) != len(new_re_types):
+                raise IndexError(
+                    "pattern and type lists must be the same length;"
+                    + "\n if type definitions are not needed pass 'None'.")
+            else:
+                for new_type in new_re_types:
+                    if new_type is None:
+                        re_type.append(dict(re_type_default))
+                    else:
+                        re_type.append(new_type)
+        return re_type
 
 
-file_parse_re = build_file_parse_re(file_parse_triggers)
-summary_parse_re, summary_parse_re_types,\
-    summary_starts = build_summary_parse_re(
-        line_record_triggers, phrase_record_triggers)
+module_parsing_properties = ParsingProperties()
+
+# for compatibility, most of the module expects module level variables
+file_parse_re = module_parsing_properties.file_parse_re
+summary_parse_re = module_parsing_properties.summary_parse_re
+summary_parse_re_types = module_parsing_properties.summary_parse_re_types
+summary_starts = module_parsing_properties.summary_starts
 
 
 def parse_new_pattern(pattern, regex_type=default_pattern_type):
