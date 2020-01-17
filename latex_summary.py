@@ -7,7 +7,9 @@ a summary.
 import os
 import re
 import sys
+import ast
 from collections import OrderedDict
+
 
 file_parse_triggers = [
     r"input",
@@ -48,8 +50,10 @@ phrase_record_triggers = [
     r"BADREF[ERENCE]*",
     r"OPT[IONAL]*_*TO+DO+",
     r"IDEA",
+    r"CUSTOM_TRIG+ER_LINE",
+    r"CUSTOM_TRIG+ER_PHRASE",
+    r"CUSTOM_TRIG+ER_FILE",
 ]
-
 re_comment = re.compile("\\s*%")
 
 recognise_directive = r"%! *"
@@ -231,6 +235,11 @@ def build_summary_parse_re(commands, patterns):
     re_type[pat_offset + 10]["count"] = "idea"
     re_type[pat_offset + 10]["legend"] = "An idea that should be explored."
     re_type[pat_offset + 10]["prefix"] = " Idea: "
+
+    # Modify the list of regexps to add functionality
+    re_type[pat_offset + 11]["modifier"] = "line_record_triggers"
+    re_type[pat_offset + 12]["modifier"] = "phrase_record_triggers"
+    re_type[pat_offset + 13]["modifier"] = "file_parse_triggers"
 
     re_type[cmd_offset + 0] = {"title": True}  # \title{}
     re_type[cmd_offset + 1] = {"title": False}  # \maketitle
@@ -623,9 +632,47 @@ def records_are_value(rec_str, prev_record, curr_record):
     return logical, val
 
 
+def record_to_modifier_pattern(record):
+    delimiter = ";"
+    try:
+        new_partial_re, new_re_type_string = record.split(delimiter, 1)[:]
+    except ValueError:
+        new_partial_re = record
+        new_re_type_string = "None"
+
+    new_partial_re = new_partial_re.strip()
+    new_re_type = ast.literal_eval(new_re_type_string.strip())
+
+    return new_partial_re, new_re_type
+
+
+def process_modifier(record_type, record):
+    modifier_call = getattr(
+        module_parsing_properties,
+        "add_" + record_type["modifier"])
+    new_partial_re, new_re_type = record_to_modifier_pattern(record)
+    print(new_partial_re)
+    print(new_re_type)
+    print(modifier_call)
+    modifier_call([new_partial_re], [new_re_type])
+    print("done.")
+    file_parse_re = module_parsing_properties.file_parse_re
+    summary_parse_re = module_parsing_properties.summary_parse_re
+    summary_parse_re_types = module_parsing_properties.summary_parse_re_types
+    summary_starts = module_parsing_properties.summary_starts
+
+
 def process_record(records, line, line_info, prev_record, nums,):
 
     record_type, record = detect_record(line)
+
+    # modifiers alter the capturing regexp and are treated first, if one is
+    # encountered an early return is performed as the record should not be
+    # written.
+    if record_is("modifier", record_type):
+        process_modifier(record_type, record)
+        prev_record = record_type
+        return prev_record, nums
 
     if record_is("line", record_type):
         close_itemlist(records['summary'],

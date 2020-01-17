@@ -4,7 +4,7 @@
 \section{Parser results}
     \begin{itemize}[noitemsep]
 \item \textbf{sections}: 11 were detected.
-\item \textbf{todos}: 10(1) were detected (completed).
+\item \textbf{todos}: 11(1) were detected (completed).
 \item \textbf{questions}: 1 were detected.
 \item \textbf{summarys}: 4 were detected.
 \item \textbf{bad references}: 1 were detected.
@@ -64,6 +64,8 @@
         % test\import_test/file_import.tex:11
         \item {\color{red}Import a file.} (section~\ref{autosec:11})
         % test\import_test/file_subfile.tex:18
+        \item {\color{red}this todo in in a custom input file.} (section~\ref{autosec:11})
+        % test\custom_input.tex:5
     \end{enumerate}
 
 % Start file : test\main.tex
@@ -245,6 +247,8 @@ This doesn't work yet.
         % test\import_test/file_subfile.tex:22
 % End file : test\import_test/file_subfile.tex
 % Start file : test\custom_input.tex
+        \item {\color{red}this todo in in a custom input file.}
+        % test\custom_input.tex:5
 % End file : test\custom_input.tex
     \end{itemize}
 % End file : test\main.tex
