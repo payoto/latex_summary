@@ -125,7 +125,7 @@ capture_specifiers = generate_capture_specifiers(
 
 
 def command_name_to_re_string(command):
-    return r"^[\b]*(\\" + command + ".*)"
+    return r"^\s*(\\" + command + ".*)"
 
 
 def pattern_name_to_re_string(pattern,
@@ -160,7 +160,7 @@ def build_regex_list(patterns):
 
 def build_file_parse_re(commands):
 
-    patterns = [r"^[\b]*\\" + c + file_capture for c in commands]
+    patterns = [r"^\s*\\" + c + file_capture for c in commands]
     temp_file_parse_re = []
 
     for command, regexp in zip(commands, build_regex_list(patterns)):

@@ -3,8 +3,8 @@
 
 \section{Parser results}
     \begin{itemize}[noitemsep]
-\item \textbf{sections}: 11 were detected.
-\item \textbf{todos}: 11(1) were detected (completed).
+\item \textbf{sections}: 13 were detected.
+\item \textbf{todos}: 13(1) were detected (completed).
 \item \textbf{questions}: 1 were detected.
 \item \textbf{summarys}: 4 were detected.
 \item \textbf{bad references}: 1 were detected.
@@ -61,11 +61,15 @@
         % test\test_latex_summary2.tex:8
         \item {\color{red}Import a file.} (section~\ref{autosec:9})
         % test\import_test/file_import.tex:11
-        \item {\color{red}Import a file.} (section~\ref{autosec:10})
-        % test\import_test/file_import.tex:11
+        \item {\color{red}Just a todo in the section with leading spaces.} (section~\ref{autosec:10})
+        % test\import_test/file_import.tex:19
         \item {\color{red}Import a file.} (section~\ref{autosec:11})
+        % test\import_test/file_import.tex:11
+        \item {\color{red}Just a todo in the section with leading spaces.} (section~\ref{autosec:12})
+        % test\import_test/file_import.tex:19
+        \item {\color{red}Import a file.} (section~\ref{autosec:13})
         % test\import_test/file_subfile.tex:18
-        \item {\color{red}this todo in in a custom input file.} (section~\ref{autosec:11})
+        \item {\color{red}this todo in in a custom input file.} (section~\ref{autosec:13})
         % test\custom_input.tex:5
     \end{enumerate}
 
@@ -208,12 +212,19 @@ This doesn't work yet.
         % test\import_test/file_import.tex:14
         \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:15
+    \end{itemize}
+\chapter{Sections with leading spaces}
+        % test\import_test/file_import.tex:17
+\label{autosec:9}
+    \begin{itemize}[noitemsep]
+        \item {\color{red}Just a todo in the section with leading spaces.}
+        % test\import_test/file_import.tex:19
 % End file : test\import_test/file_import.tex
 % Start file : test\import_test/file_import.tex
     \end{itemize}
 \chapter{Test import}
         % test\import_test/file_import.tex:1
-\label{autosec:9}
+\label{autosec:10}
 This doesn't work yet.
         % test\import_test/file_import.tex:2
     \begin{itemize}[noitemsep]
@@ -227,12 +238,19 @@ This doesn't work yet.
         % test\import_test/file_import.tex:14
         \item {\color{Gray}Tom: Comment from supervisor. with many dots. (done then eol) [ (completed) supervisor(Tom)]}
         % test\import_test/file_import.tex:15
+    \end{itemize}
+\chapter{Sections with leading spaces}
+        % test\import_test/file_import.tex:17
+\label{autosec:11}
+    \begin{itemize}[noitemsep]
+        \item {\color{red}Just a todo in the section with leading spaces.}
+        % test\import_test/file_import.tex:19
 % End file : test\import_test/file_import.tex
 % Start file : test\import_test/file_subfile.tex
     \end{itemize}
 \chapter{Test subfile}
         % test\import_test/file_subfile.tex:8
-\label{autosec:10}
+\label{autosec:12}
 This doesn't work yet.
         % test\import_test/file_subfile.tex:9
     \begin{itemize}[noitemsep]
@@ -251,7 +269,7 @@ This doesn't work yet.
     \end{itemize}
 \customseccommand{This section is added via a custom line capture section} 
         % test\custom_input.tex:1
-\label{autosec:11}
+\label{autosec:13}
     \begin{itemize}[noitemsep]
         \item {\color{brown}This fart is a custom trigger, it should be brown.}
         % test\custom_input.tex:3
@@ -263,7 +281,7 @@ This doesn't work yet.
     \end{itemize}
 \customseccommand{This section is added via a custom line capture section in the main } 
         % test\main.tex:29
-\label{autosec:11}
+\label{autosec:13}
     \begin{itemize}[noitemsep]
         \item {\color{brown}This fart is a custom trigger in the main file, it should be brown.}
         % test\main.tex:31
