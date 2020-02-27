@@ -590,7 +590,7 @@ def detect_file(line, current_file):
     return next_file, next_file_triggers
 
 
-def detect_record(line):
+def detect_record(line, prev_record=None):
     record_type = {}
     record = line
     for pat_re, pat_type in zip(
@@ -599,6 +599,13 @@ def detect_record(line):
         m = pat_re.search(line)
         if m:
             break
+
+    # Check if the record is active or Not, if it is None, the activity depends
+    # on the previous record
+    if (prev_record is not None and "active" in prev_record and
+            "active" in pat_type and pat_type["active"] is None):
+        pat_type["active"] = prev_record["active"]
+
     if m and ("active" not in pat_type or pat_type["active"]):
         record = m.group(1)
         record_type = pat_type
@@ -663,7 +670,7 @@ def process_modifier(record_type, record):
 
 def process_record(records, line, line_info, prev_record, nums,):
 
-    record_type, record = detect_record(line)
+    record_type, record = detect_record(line, prev_record)
 
     # modifiers alter the capturing regexp and are treated first, if one is
     # encountered an early return is performed as the record should not be
@@ -776,8 +783,10 @@ def main():
                     module_parseprops.summary_starts["pattern"],
                     module_parseprops.summary_starts["pattern"]
                     + len(phrase_record_triggers) * len(capture_specifiers)):
-                if not module_parseprops.summary_parse_re[i].match(
-                        "%!SUMMARY"):
+                if not (
+                    module_parseprops.summary_parse_re[i].match("%!SUMMARY") or
+                    module_parseprops.summary_parse_re[i].match("%!MULT")
+                ):
                     module_parseprops.summary_parse_re_types[i]["active"] =\
                         False
             record_writer_args['name_change'] = default_name_change + "only"

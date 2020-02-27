@@ -3,7 +3,7 @@
 
 \section{Parser results}
     \begin{itemize}[noitemsep]
-\item \textbf{sections}: 10 were detected.
+\item \textbf{sections}: 11 were detected.
 \item \textbf{summarys}: 4 were detected.
     \end{itemize}
 
@@ -31,7 +31,8 @@
 \subsection{Sample subsection}
         % test\test_latex_summary.tex:16
 \label{autosec:2}
-\vspace{-36pt}\hspace{11pt}
+And also do other things.
+        % test\test_latex_summary.tex:25
 \subsection{lorem}
         % test\test_latex_summary.tex:27
 \label{autosec:3}
@@ -42,9 +43,13 @@
 \section{ipsum}
         % test\test_latex_summary.tex:43
 \label{autosec:4}
+This is plain text.
+        % test\test_latex_summary.tex:45
     \begin{itemize}[noitemsep]
         \item Lorem ipsum dolor sit amet, consectetur adipisicing elit.
         % test\test_latex_summary.tex:54
+Tries to say something else.
+        % test\test_latex_summary.tex:57
     \end{itemize}
 \paragraph{para 1}
         % test\test_latex_summary.tex:59
@@ -69,28 +74,49 @@
 \paragraph{para 5}
         % test\test_latex_summary.tex:68
 \label{autosec:7}
+These can overlap if the sectionning is not done correctly.
+        % test\test_latex_summary.tex:69
 % End file : test\test_latex_summary.tex
 % Start file : test\test_latex_summary2.tex
 \chapter{Test the multi-line functionality}
         % test\test_latex_summary2.tex:1
 \label{autosec:7}
+This should print raw text not in an item.
+        % test\test_latex_summary2.tex:3
     \begin{itemize}[noitemsep]
         \item Black summary test.
         % test\test_latex_summary2.tex:5
+This should match the previous sentence.
+        % test\test_latex_summary2.tex:6
+This should match the previous sentence.
+        % test\test_latex_summary2.tex:8
+This should match the previous sentence.
+        % test\test_latex_summary2.tex:10
+This should match the previous sentence.
+        % test\test_latex_summary2.tex:12
 % End file : test\test_latex_summary2.tex
 % Start file : test\import_test/file_import.tex
     \end{itemize}
 \chapter{Test import}
         % test\import_test/file_import.tex:1
 \label{autosec:8}
+This doesn't work yet.
+        % test\import_test/file_import.tex:2
 % End file : test\import_test/file_import.tex
 % Start file : test\import_test/file_import.tex
-\vspace{-36pt}\hspace{11pt}
 \chapter{Test import}
         % test\import_test/file_import.tex:1
 \label{autosec:9}
+This doesn't work yet.
+        % test\import_test/file_import.tex:2
 % End file : test\import_test/file_import.tex
-\vspace{-36pt}\hspace{11pt}
+% Start file : test\import_test/file_subfile.tex
+\chapter{Test subfile}
+        % test\import_test/file_subfile.tex:8
+\label{autosec:10}
+This doesn't work yet.
+        % test\import_test/file_subfile.tex:9
+% End file : test\import_test/file_subfile.tex
 % End file : test\main.tex
 
 
